@@ -14,6 +14,7 @@ export function OTPScreen({ nav }: OTPScreenProps) {
   const [timeLeft, setTimeLeft] = useState(30);
   const [loading, setLoading] = useState(false);
   const [verified, setVerified] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const refs = useRef<Array<HTMLInputElement | null>>([]);
 
   useEffect(() => {
@@ -109,12 +110,47 @@ export function OTPScreen({ nav }: OTPScreenProps) {
             <h2 className="text-2xl font-extrabold mb-2" style={{ color: B.primary }}>
               Verify OTP
             </h2>
-            <p className="text-slate-400 text-sm mb-8">
+            <p className="text-slate-400 text-sm mb-8 text-left">
               We sent a 6-digit code to
               <br />
               <span className="font-bold text-slate-600">+62 812 3456 7890</span>
             </p>
-            <div className="flex gap-2.5 mb-8">
+            
+            <style>{`
+              .otp-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                overflow: hidden;
+                gap: 8px;
+                margin-bottom: 32px;
+              }
+              @media (min-width: 768px) {
+                .otp-container {
+                  gap: 12px;
+                }
+              }
+              .otp-input {
+                width: 48px;
+                height: 56px;
+                border-radius: 12px;
+                font-size: 24px;
+                font-weight: 600;
+                text-align: center;
+                flex: 0 0 auto;
+                outline: none;
+                border: 2px solid #E2E8F0;
+                transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+              }
+              @media (max-width: 374px) {
+                .otp-input {
+                  width: 42px !important;
+                }
+              }
+            `}</style>
+            
+            <div className="otp-container">
               {otp.map((digit, i) => (
                 <motion.input
                   key={i}
@@ -127,11 +163,14 @@ export function OTPScreen({ nav }: OTPScreenProps) {
                   value={digit}
                   onChange={e => handleChange(i, e.target.value)}
                   onKeyDown={e => handleKeyDown(i, e)}
+                  onFocus={() => setFocusedIndex(i)}
+                  onBlur={() => setFocusedIndex(null)}
                   animate={{
-                    borderColor: digit ? B.accent : "#E2E8F0",
+                    borderColor: i === focusedIndex ? B.primary : (digit ? B.accent : "#E2E8F0"),
                     background: digit ? "#FFF8F0" : "white",
+                    boxShadow: i === focusedIndex ? "0 0 0 3px rgba(30, 41, 59, 0.15)" : "none",
                   }}
-                  className="flex-1 aspect-square text-center text-xl font-bold rounded-2xl border-2 outline-none"
+                  className="otp-input"
                   style={{ color: B.primary }}
                 />
               ))}
