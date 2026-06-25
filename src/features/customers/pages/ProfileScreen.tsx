@@ -14,16 +14,14 @@ import {
   Check,
   Home,
 } from "lucide-react";
-import { NavFn } from "@types/navigation";
+import { useAppContext } from "@app/providers/AppProvider";
 import { BottomNav } from "@components/common/BottomNav";
+import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 
-interface ProfileScreenProps {
-  nav: NavFn;
-  cartCount: number;
-}
-
-export function ProfileScreen({ nav, cartCount }: ProfileScreenProps) {
+export function ProfileScreen() {
+  const nav = useAppNav();
+  const { cartCount } = useAppContext();
   const menuItems: { Icon: typeof Home; label: string; sub: string; action?: () => void }[] = [
     { Icon: MapPin, label: "Saved Addresses", sub: "3 addresses saved" },
     { Icon: CreditCard, label: "Payment Methods", sub: "GoPay · Visa ···4821" },
@@ -145,7 +143,7 @@ export function ProfileScreen({ nav, cartCount }: ProfileScreenProps) {
           </motion.button>
         </div>
       </div>
-      <BottomNav active="profile" nav={nav} cartCount={cartCount} />
+      <BottomNav />
     </div>
   );
 }

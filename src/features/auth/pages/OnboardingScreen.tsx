@@ -3,13 +3,11 @@ import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { ONBOARDING } from "@data/mockData";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
+import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 
-interface OnboardingScreenProps {
-  onDone: () => void;
-}
-
-export function OnboardingScreen({ onDone }: OnboardingScreenProps) {
+export function OnboardingScreen() {
+  const nav = useAppNav();
   const [page, setPage] = useState(0);
   const slide = ONBOARDING[page];
 
@@ -36,7 +34,7 @@ export function OnboardingScreen({ onDone }: OnboardingScreenProps) {
         />
         <motion.button
           whileTap={{ scale: 0.94 }}
-          onClick={onDone}
+          onClick={() => nav("login")}
           className="absolute top-12 right-5 px-4 py-1.5 rounded-full text-xs font-semibold text-white/80 bg-white/20 backdrop-blur-sm"
         >
           Skip
@@ -74,7 +72,7 @@ export function OnboardingScreen({ onDone }: OnboardingScreenProps) {
               Continue <ArrowRight className="w-4 h-4" />
             </PrimaryBtn>
           ) : (
-            <PrimaryBtn className="w-full py-4" onClick={onDone}>
+            <PrimaryBtn className="w-full py-4" onClick={() => nav("login")}>
               Get Started
             </PrimaryBtn>
           )}

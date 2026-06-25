@@ -1,16 +1,35 @@
 import React from "react";
+import { useLocation } from "react-router";
 import { motion } from "motion/react";
 import { Home, ShoppingCart, User, Gift, Coffee } from "lucide-react";
+import { ROUTES } from "@app/router/routes";
+import { useAppContext } from "@app/providers/AppProvider";
 import { B } from "@styles/theme";
-import { Screen, NavFn } from "@types/navigation";
+import { Screen } from "@types/navigation";
+import { useAppNav } from "@hooks/useAppNav";
 
-interface BottomNavProps {
-  active: Screen;
-  nav: NavFn;
-  cartCount?: number;
+const PATH_TO_SCREEN: { path: string; screen: Screen }[] = [
+  { path: ROUTES.DASHBOARD, screen: "home" },
+  { path: ROUTES.MENU, screen: "menu" },
+  { path: ROUTES.CART, screen: "cart" },
+  { path: ROUTES.LOYALTY, screen: "loyalty" },
+  { path: ROUTES.PROFILE, screen: "profile" },
+];
+
+function getActiveScreen(pathname: string): Screen {
+  if (pathname.startsWith(`${ROUTES.MENU}/`)) {
+    return "menu";
+  }
+  const match = PATH_TO_SCREEN.find(({ path }) => pathname === path);
+  return match?.screen ?? "home";
 }
 
-export function BottomNav({ active, nav, cartCount = 0 }: BottomNavProps) {
+export function BottomNav() {
+  const location = useLocation();
+  const nav = useAppNav();
+  const { cartCount } = useAppContext();
+  const active = getActiveScreen(location.pathname);
+
   const tabs: { id: Screen; Icon: typeof Home; label: string }[] = [
     { id: "home", Icon: Home, label: "Home" },
     { id: "menu", Icon: Coffee, label: "Menu" },

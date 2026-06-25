@@ -1,0 +1,1 @@
+import{j as r}from"./index-wpjw20pW.js";import{C as i}from"./ComingSoon-C3M9LCR_.js";import"./coffee-DAwV-4mv.js";import"./createLucideIcon-wfEB_Ef7.js";function s(){return r.jsx(i,{title:"Order Details",description:"Order details will be available soon."})}export{s as OrderDetailPage};

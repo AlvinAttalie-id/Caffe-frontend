@@ -1,18 +1,15 @@
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, MapPin, Clock } from "lucide-react";
-import { NavFn } from "@types/navigation";
-import { CartItem } from "@features/orders/types";
+import { useAppContext } from "@app/providers/AppProvider";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
+import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 import { fmt } from "@lib/utils";
 
-interface CheckoutScreenProps {
-  nav: NavFn;
-  cartItems: CartItem[];
-}
-
-export function CheckoutScreen({ nav, cartItems }: CheckoutScreenProps) {
+export function CheckoutScreen() {
+  const nav = useAppNav();
+  const { cartItems } = useAppContext();
   const [method, setMethod] = useState<"pickup" | "delivery">("pickup");
 
   const subtotal = cartItems.reduce((s, item) => s + item.product.price * item.quantity, 0);

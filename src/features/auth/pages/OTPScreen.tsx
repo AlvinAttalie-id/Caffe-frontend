@@ -3,13 +3,10 @@ import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, Phone, CheckCircle } from "lucide-react";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
 import { B } from "@styles/theme";
-import { NavFn } from "@types/navigation";
+import { useAppNav } from "@hooks/useAppNav";
 
-interface OTPScreenProps {
-  nav: NavFn;
-}
-
-export function OTPScreen({ nav }: OTPScreenProps) {
+export function OTPScreen() {
+  const nav = useAppNav();
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timeLeft, setTimeLeft] = useState(30);
   const [loading, setLoading] = useState(false);

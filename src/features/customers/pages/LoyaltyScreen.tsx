@@ -1,17 +1,15 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
 import { Trophy } from "lucide-react";
-import { NavFn } from "@types/navigation";
+import { useAppContext } from "@app/providers/AppProvider";
 import { Spinner } from "@components/ui/spinner";
 import { BottomNav } from "@components/common/BottomNav";
+import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 
-interface LoyaltyScreenProps {
-  nav: NavFn;
-  cartCount: number;
-}
-
-export function LoyaltyScreen({ nav, cartCount }: LoyaltyScreenProps) {
+export function LoyaltyScreen() {
+  const nav = useAppNav();
+  const { cartCount } = useAppContext();
   const [redeemLoading, setRedeemLoading] = useState<number | null>(null);
 
   const rewards = [
@@ -182,7 +180,7 @@ export function LoyaltyScreen({ nav, cartCount }: LoyaltyScreenProps) {
           </div>
         </div>
       </div>
-      <BottomNav active="loyalty" nav={nav} cartCount={cartCount} />
+      <BottomNav />
     </div>
   );
 }

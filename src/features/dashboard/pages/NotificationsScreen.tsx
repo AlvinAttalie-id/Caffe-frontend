@@ -1,14 +1,11 @@
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft } from "lucide-react";
-import { NavFn } from "@types/navigation";
+import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 
-interface NotificationsScreenProps {
-  nav: NavFn;
-}
-
-export function NotificationsScreen({ nav }: NotificationsScreenProps) {
+export function NotificationsScreen() {
+  const nav = useAppNav();
   const notifs = [
     { title: "Order Update", msg: "Your Caramel Macchiato is being prepared by our barista! ☕", time: "2 min ago", read: false, emoji: "☕", color: B.secondary },
     { title: "Weekend Special", msg: "Double points on all orders this weekend. Don't miss out!", time: "1 hr ago", read: false, emoji: "🎉", color: "#7C3AED" },

@@ -1,31 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { ChevronLeft, Search, Coffee } from "lucide-react";
-import { NavFn } from "@types/navigation";
-import { Product } from "@features/products/types";
+import { useAppContext } from "@app/providers/AppProvider";
 import { ProductCard } from "@features/products/components/ProductCard";
 import { SkProductCard } from "@features/products/components/SkProductCard";
 import { BottomNav } from "@components/common/BottomNav";
 import { PRODUCTS } from "@data/mockData";
+import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 
-interface MenuScreenProps {
-  nav: NavFn;
-  cartCount: number;
-  favorites: number[];
-  onFavorite: (id: number) => void;
-  onAdd: (p: Product) => void;
-  onProduct: (p: Product) => void;
-}
+export function MenuScreen() {
+  const nav = useAppNav();
+  const { cartCount, favorites, toggleFavorite, quickAdd, openProduct } = useAppContext();
 
-export function MenuScreen({
-  nav,
-  cartCount,
-  favorites,
-  onFavorite,
-  onAdd,
-  onProduct,
-}: MenuScreenProps) {
+  const onFavorite = toggleFavorite;
+  const onAdd = quickAdd;
+  const onProduct = (p: (typeof PRODUCTS)[number]) => {
+    openProduct(p);
+    nav("product");
+  };
   const [cat, setCat] = useState("all");
   const [search, setSearch] = useState("");
   const [loaded, setLoaded] = useState(false);
@@ -81,12 +74,15 @@ export function MenuScreen({
               key={t.id}
               onClick={() => setCat(t.id)}
               whileTap={{ scale: 0.92 }}
-              className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold"
+              className="flex-shrink-0 flex items-center justify-center px-4 py-2 rounded-full text-xs"
               animate={{
                 background: cat === t.id ? B.primary : "transparent",
                 color: cat === t.id ? "#FFFFFF" : "#94A3B8",
               }}
-              style={{ border: `1.5px solid ${cat === t.id ? B.primary : "#E2E8F0"}` }}
+              style={{
+                border: `1.5px solid ${cat === t.id ? B.primary : "#E2E8F0"}`,
+                fontWeight: 600,
+              }}
             >
               {t.label}
             </motion.button>
@@ -131,7 +127,7 @@ export function MenuScreen({
           </motion.div>
         )}
       </div>
-      <BottomNav active="menu" nav={nav} cartCount={cartCount} />
+      <BottomNav />
     </div>
   );
 }

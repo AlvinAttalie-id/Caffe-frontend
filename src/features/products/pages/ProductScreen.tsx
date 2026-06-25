@@ -1,29 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, Heart, Star, Minus, Plus, Check } from "lucide-react";
-import { Product } from "@features/products/types";
 import { CartItem } from "@features/orders/types";
-import { NavFn } from "@types/navigation";
+import { useAppContext } from "@app/providers/AppProvider";
 import { ProductSkeleton } from "@features/products/components/ProductSkeleton";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
+import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 import { fmt } from "@lib/utils";
 
-interface ProductScreenProps {
-  product: Product;
-  isFavorite: boolean;
-  nav: NavFn;
-  onFavorite: () => void;
-  onAddToCart: (item: CartItem) => void;
-}
-
-export function ProductScreen({
-  product,
-  isFavorite,
-  nav,
-  onFavorite,
-  onAddToCart,
-}: ProductScreenProps) {
+export function ProductScreen() {
+  const nav = useAppNav();
+  const { selectedProduct, favorites, toggleFavorite, addToCart } = useAppContext();
   const [size, setSize] = useState("M");
   const [sugar, setSugar] = useState("Normal");
   const [ice, setIce] = useState("Normal");
@@ -35,6 +23,18 @@ export function ProductScreen({
     const t = setTimeout(() => setLoaded(true), 320);
     return () => clearTimeout(t);
   }, []);
+
+  if (!selectedProduct) {
+    return null;
+  }
+
+  const product = selectedProduct;
+  const isFavorite = favorites.includes(product.id);
+  const onFavorite = () => toggleFavorite(product.id);
+  const onAddToCart = (item: CartItem) => {
+    addToCart(item);
+    nav("cart", "up");
+  };
 
   const sizes = [
     { id: "S", extra: 0 },

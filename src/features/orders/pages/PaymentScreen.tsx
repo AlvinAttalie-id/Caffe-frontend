@@ -1,15 +1,12 @@
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, CreditCard } from "lucide-react";
-import { NavFn } from "@types/navigation";
+import { useAppNav } from "@hooks/useAppNav";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
 import { B } from "@styles/theme";
 
-interface PaymentScreenProps {
-  nav: NavFn;
-}
-
-export function PaymentScreen({ nav }: PaymentScreenProps) {
+export function PaymentScreen() {
+  const nav = useAppNav();
   const [selected, setSelected] = useState("gopay");
   const [loading, setLoading] = useState(false);
 

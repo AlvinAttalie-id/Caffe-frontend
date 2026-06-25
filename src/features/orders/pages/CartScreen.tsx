@@ -1,28 +1,19 @@
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ShoppingCart, X, Minus, Plus, Tag, MessageCircle, Award } from "lucide-react";
-import { NavFn } from "@types/navigation";
-import { CartItem } from "@features/orders/types";
+import { useAppContext } from "@app/providers/AppProvider";
 import { BottomNav } from "@components/common/BottomNav";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
+import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 import { fmt } from "@lib/utils";
 
-interface CartScreenProps {
-  nav: NavFn;
-  cartItems: CartItem[];
-  cartCount: number;
-  onUpdateQty: (idx: number, qty: number) => void;
-  onRemove: (idx: number) => void;
-}
+export function CartScreen() {
+  const nav = useAppNav();
+  const { cartItems, cartCount, updateCartQty, removeFromCart } = useAppContext();
 
-export function CartScreen({
-  nav,
-  cartItems,
-  cartCount,
-  onUpdateQty,
-  onRemove,
-}: CartScreenProps) {
+  const onUpdateQty = updateCartQty;
+  const onRemove = removeFromCart;
   const [voucher, setVoucher] = useState("");
   const [applied, setApplied] = useState(false);
   const [notes, setNotes] = useState("");
@@ -59,7 +50,7 @@ export function CartScreen({
             Browse Menu
           </PrimaryBtn>
         </div>
-        <BottomNav active="cart" nav={nav} cartCount={cartCount} />
+        <BottomNav />
       </div>
     );
   }
@@ -249,7 +240,7 @@ export function CartScreen({
           <span>{fmt(total)}</span>
         </PrimaryBtn>
       </div>
-      <BottomNav active="cart" nav={nav} cartCount={cartCount} />
+      <BottomNav />
     </div>
   );
 }

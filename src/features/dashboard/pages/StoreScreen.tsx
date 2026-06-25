@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { ChevronLeft, Search, Navigation, Coffee, Building2, MapPin, Clock, Star } from "lucide-react";
-import { NavFn } from "@types/navigation";
 import { SkStoreCard } from "@features/dashboard/components/SkStoreCard";
 import { STORES } from "@data/mockData";
+import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 
-interface StoreScreenProps {
-  nav: NavFn;
-}
-
-export function StoreScreen({ nav }: StoreScreenProps) {
+export function StoreScreen() {
+  const nav = useAppNav();
   const [search, setSearch] = useState("");
   const [loaded, setLoaded] = useState(false);
 

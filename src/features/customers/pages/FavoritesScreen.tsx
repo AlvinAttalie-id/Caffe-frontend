@@ -1,28 +1,23 @@
 import React from "react";
 import { motion } from "motion/react";
 import { Heart } from "lucide-react";
-import { NavFn } from "@types/navigation";
-import { Product } from "@features/products/types";
+import { useAppContext } from "@app/providers/AppProvider";
 import { ProductCard } from "@features/products/components/ProductCard";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
 import { PRODUCTS } from "@data/mockData";
+import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 
-interface FavoritesScreenProps {
-  nav: NavFn;
-  favorites: number[];
-  onFavorite: (id: number) => void;
-  onAdd: (p: Product) => void;
-  onProduct: (p: Product) => void;
-}
+export function FavoritesScreen() {
+  const nav = useAppNav();
+  const { favorites, toggleFavorite, quickAdd, openProduct } = useAppContext();
 
-export function FavoritesScreen({
-  nav,
-  favorites,
-  onFavorite,
-  onAdd,
-  onProduct,
-}: FavoritesScreenProps) {
+  const onFavorite = toggleFavorite;
+  const onAdd = quickAdd;
+  const onProduct = (p: (typeof PRODUCTS)[number]) => {
+    openProduct(p);
+    nav("product");
+  };
   const favProducts = PRODUCTS.filter(p => favorites.includes(p.id));
 
   return (

@@ -1,0 +1,1 @@
+import{j as r}from"./index-wpjw20pW.js";import{C as o}from"./ComingSoon-C3M9LCR_.js";import"./coffee-DAwV-4mv.js";import"./createLucideIcon-wfEB_Ef7.js";function n(){return r.jsx(o,{title:"Orders",description:"Order management will be available soon."})}export{n as OrdersPage};

@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { ChevronLeft } from "lucide-react";
-import { NavFn } from "@types/navigation";
+import { useAppNav } from "@hooks/useAppNav";
 import { OrderHistorySkeleton } from "@features/orders/components/OrderHistorySkeleton";
 import { B } from "@styles/theme";
 import { fmt } from "@lib/utils";
 
-interface HistoryScreenProps {
-  nav: NavFn;
-}
-
-export function HistoryScreen({ nav }: HistoryScreenProps) {
+export function HistoryScreen() {
+  const nav = useAppNav();
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {

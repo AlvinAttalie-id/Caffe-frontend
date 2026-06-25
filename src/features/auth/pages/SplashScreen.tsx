@@ -1,25 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Coffee } from "lucide-react";
+import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 
-interface SplashScreenProps {
-  onDone: () => void;
-}
-
-export function SplashScreen({ onDone }: SplashScreenProps) {
+export function SplashScreen() {
+  const nav = useAppNav();
   const [step, setStep] = useState(0);
 
   useEffect(() => {
     const ts = [160, 420, 800, 1150, 1700].map((ms, i) =>
       setTimeout(() => setStep(i + 1), ms)
     );
-    const done = setTimeout(onDone, 2500);
+    const done = setTimeout(() => nav("onboarding", "fade"), 2500);
     return () => {
       ts.forEach(clearTimeout);
       clearTimeout(done);
     };
-  }, [onDone]);
+  }, [nav]);
 
   return (
     <div

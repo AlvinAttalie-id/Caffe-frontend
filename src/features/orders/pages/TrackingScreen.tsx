@@ -2,14 +2,11 @@ import React, { useEffect } from "react";
 import { motion } from "motion/react";
 import confetti from "canvas-confetti";
 import { ChevronLeft, Building2, Clock } from "lucide-react";
-import { NavFn } from "@types/navigation";
+import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 
-interface TrackingScreenProps {
-  nav: NavFn;
-}
-
-export function TrackingScreen({ nav }: TrackingScreenProps) {
+export function TrackingScreen() {
+  const nav = useAppNav();
   useEffect(() => {
     const t = setTimeout(
       () =>

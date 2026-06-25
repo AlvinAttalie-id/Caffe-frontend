@@ -1,32 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Bell, MapPin, ChevronDown, Search, Trophy, Clock, Building2 } from "lucide-react";
-import { NavFn, Screen } from "@types/navigation";
-import { Product } from "@features/products/types";
+import { useAppContext } from "@app/providers/AppProvider";
 import { HomeSkeleton } from "@features/dashboard/components/HomeSkeleton";
 import { ProductCard } from "@features/products/components/ProductCard";
 import { BottomNav } from "@components/common/BottomNav";
 import { PRODUCTS, STORES, BANNERS } from "@data/mockData";
+import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 import { fmt } from "@lib/utils";
 
-interface HomeScreenProps {
-  nav: NavFn;
-  cartCount: number;
-  favorites: number[];
-  onFavorite: (id: number) => void;
-  onAdd: (p: Product) => void;
-  onProduct: (p: Product) => void;
-}
+export function HomeScreen() {
+  const nav = useAppNav();
+  const { cartCount, favorites, toggleFavorite, quickAdd, openProduct } = useAppContext();
 
-export function HomeScreen({
-  nav,
-  cartCount,
-  favorites,
-  onFavorite,
-  onAdd,
-  onProduct,
-}: HomeScreenProps) {
+  const onFavorite = toggleFavorite;
+  const onAdd = quickAdd;
+  const onProduct = (p: (typeof PRODUCTS)[number]) => {
+    openProduct(p);
+    nav("product");
+  };
   const [loaded, setLoaded] = useState(false);
   const [bannerIdx, setBannerIdx] = useState(0);
   const [cat, setCat] = useState("all");
@@ -42,12 +35,12 @@ export function HomeScreen({
   }, []);
 
   const categories = [
-    { id: "all", label: "All", emoji: "✨" },
-    { id: "coffee", label: "Coffee", emoji: "☕" },
-    { id: "noncoffee", label: "Non Coffee", emoji: "🥤" },
-    { id: "tea", label: "Tea", emoji: "🍵" },
-    { id: "pastry", label: "Pastry", emoji: "🥐" },
-    { id: "snacks", label: "Snacks", emoji: "🍪" },
+    { id: "all", label: "All" },
+    { id: "coffee", label: "Coffee" },
+    { id: "noncoffee", label: "Non Coffee" },
+    { id: "tea", label: "Tea" },
+    { id: "pastry", label: "Pastry" },
+    { id: "snacks", label: "Snacks" },
   ];
 
   const filtered = cat === "all" ? PRODUCTS : PRODUCTS.filter(p => p.category === cat);
@@ -219,14 +212,16 @@ export function HomeScreen({
                 key={c.id}
                 onClick={() => setCat(c.id)}
                 whileTap={{ scale: 0.9 }}
-                className="flex-shrink-0 flex flex-col items-center gap-1 px-4 py-2.5 rounded-2xl shadow-sm"
+                className="flex-shrink-0 flex items-center justify-center px-4 py-2.5 rounded-2xl shadow-sm"
                 animate={{ background: cat === c.id ? B.primary : "white" }}
                 transition={{ duration: 0.18 }}
               >
-                <span className="text-lg">{c.emoji}</span>
                 <span
-                  className="text-[10px] font-bold whitespace-nowrap"
-                  style={{ color: cat === c.id ? "white" : "#94A3B8" }}
+                  className="text-xs whitespace-nowrap"
+                  style={{
+                    color: cat === c.id ? "white" : "#94A3B8",
+                    fontWeight: 600,
+                  }}
                 >
                   {c.label}
                 </span>
@@ -349,7 +344,7 @@ export function HomeScreen({
           </div>
         </div>
       </div>
-      <BottomNav active="home" nav={nav} cartCount={cartCount} />
+      <BottomNav />
     </motion.div>
   );
 }
