@@ -1,1 +1,0 @@
-import{j as o}from"./index-wpjw20pW.js";import{C as r}from"./ComingSoon-C3M9LCR_.js";import"./coffee-DAwV-4mv.js";import"./createLucideIcon-wfEB_Ef7.js";function a(){return o.jsx(r,{title:"Forgot Password",description:"Password recovery will be available soon."})}export{a as ForgotPasswordPage};

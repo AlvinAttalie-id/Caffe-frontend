@@ -1,1 +1,0 @@
-import{j as i}from"./index-wpjw20pW.js";import{C as t}from"./ComingSoon-C3M9LCR_.js";import"./coffee-DAwV-4mv.js";import"./createLucideIcon-wfEB_Ef7.js";function m(){return i.jsx(t,{title:"Edit Menu Item",description:"Menu editing will be available soon."})}export{m as EditMenuPage};

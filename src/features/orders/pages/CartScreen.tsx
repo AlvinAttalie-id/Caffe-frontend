@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ShoppingCart, X, Minus, Plus, Tag, MessageCircle, Award } from "lucide-react";
 import { useAppContext } from "@app/providers/AppProvider";
-import { BottomNav } from "@components/common/BottomNav";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
 import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
@@ -10,7 +9,7 @@ import { fmt } from "@lib/utils";
 
 export function CartScreen() {
   const nav = useAppNav();
-  const { cartItems, cartCount, updateCartQty, removeFromCart } = useAppContext();
+  const { cartItems, updateCartQty, removeFromCart } = useAppContext();
 
   const onUpdateQty = updateCartQty;
   const onRemove = removeFromCart;
@@ -50,7 +49,6 @@ export function CartScreen() {
             Browse Menu
           </PrimaryBtn>
         </div>
-        <BottomNav />
       </div>
     );
   }
@@ -240,7 +238,6 @@ export function CartScreen() {
           <span>{fmt(total)}</span>
         </PrimaryBtn>
       </div>
-      <BottomNav />
     </div>
   );
 }

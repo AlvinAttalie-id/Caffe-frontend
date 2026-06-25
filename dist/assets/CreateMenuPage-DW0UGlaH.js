@@ -1,1 +1,0 @@
-import{j as t}from"./index-wpjw20pW.js";import{C as e}from"./ComingSoon-C3M9LCR_.js";import"./coffee-DAwV-4mv.js";import"./createLucideIcon-wfEB_Ef7.js";function m(){return t.jsx(e,{title:"Create Menu Item",description:"Menu creation tools are on the way."})}export{m as CreateMenuPage};

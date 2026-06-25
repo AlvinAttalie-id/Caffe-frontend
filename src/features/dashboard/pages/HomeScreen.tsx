@@ -4,7 +4,6 @@ import { Bell, MapPin, ChevronDown, Search, Trophy, Clock, Building2 } from "luc
 import { useAppContext } from "@app/providers/AppProvider";
 import { HomeSkeleton } from "@features/dashboard/components/HomeSkeleton";
 import { ProductCard } from "@features/products/components/ProductCard";
-import { BottomNav } from "@components/common/BottomNav";
 import { PRODUCTS, STORES, BANNERS } from "@data/mockData";
 import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
@@ -12,7 +11,7 @@ import { fmt } from "@lib/utils";
 
 export function HomeScreen() {
   const nav = useAppNav();
-  const { cartCount, favorites, toggleFavorite, quickAdd, openProduct } = useAppContext();
+  const { favorites, toggleFavorite, quickAdd, openProduct } = useAppContext();
 
   const onFavorite = toggleFavorite;
   const onAdd = quickAdd;
@@ -344,7 +343,6 @@ export function HomeScreen() {
           </div>
         </div>
       </div>
-      <BottomNav />
     </motion.div>
   );
 }

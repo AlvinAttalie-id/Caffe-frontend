@@ -15,7 +15,6 @@ import {
   Home,
 } from "lucide-react";
 import { useAppContext } from "@app/providers/AppProvider";
-import { BottomNav } from "@components/common/BottomNav";
 import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 
@@ -143,7 +142,6 @@ export function ProfileScreen() {
           </motion.button>
         </div>
       </div>
-      <BottomNav />
     </div>
   );
 }

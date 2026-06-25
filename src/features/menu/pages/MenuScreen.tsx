@@ -4,7 +4,6 @@ import { ChevronLeft, Search, Coffee } from "lucide-react";
 import { useAppContext } from "@app/providers/AppProvider";
 import { ProductCard } from "@features/products/components/ProductCard";
 import { SkProductCard } from "@features/products/components/SkProductCard";
-import { BottomNav } from "@components/common/BottomNav";
 import { PRODUCTS } from "@data/mockData";
 import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
@@ -89,7 +88,7 @@ export function MenuScreen() {
           ))}
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto no-scrollbar px-5 pt-4 pb-20">
+      <div className="flex-1 overflow-y-auto no-scrollbar px-5 pt-4 pb-4">
         {!loaded ? (
           <div className="grid grid-cols-2 gap-3">
             {[0, 1, 2, 3, 4, 5].map(i => (
@@ -127,7 +126,6 @@ export function MenuScreen() {
           </motion.div>
         )}
       </div>
-      <BottomNav />
     </div>
   );
 }

@@ -3,7 +3,6 @@ import { motion } from "motion/react";
 import { Trophy } from "lucide-react";
 import { useAppContext } from "@app/providers/AppProvider";
 import { Spinner } from "@components/ui/spinner";
-import { BottomNav } from "@components/common/BottomNav";
 import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 
@@ -180,7 +179,6 @@ export function LoyaltyScreen() {
           </div>
         </div>
       </div>
-      <BottomNav />
     </div>
   );
 }

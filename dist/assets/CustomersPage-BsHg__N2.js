@@ -1,1 +1,0 @@
-import{j as o}from"./index-wpjw20pW.js";import{C as t}from"./ComingSoon-C3M9LCR_.js";import"./coffee-DAwV-4mv.js";import"./createLucideIcon-wfEB_Ef7.js";function s(){return o.jsx(t,{title:"Customers",description:"Customer management will be available soon."})}export{s as CustomersPage};

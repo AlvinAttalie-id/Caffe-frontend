@@ -1,1 +1,0 @@
-import{j as o}from"./index-wpjw20pW.js";import{C as t}from"./ComingSoon-C3M9LCR_.js";import"./coffee-DAwV-4mv.js";import"./createLucideIcon-wfEB_Ef7.js";function m(){return o.jsx(t,{title:"Customer Details",description:"Customer details will be available soon."})}export{m as CustomerDetailPage};

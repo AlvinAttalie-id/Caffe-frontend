@@ -1,1 +1,0 @@
-import{j as o}from"./index-wpjw20pW.js";import{C as s}from"./ComingSoon-C3M9LCR_.js";import"./coffee-DAwV-4mv.js";import"./createLucideIcon-wfEB_Ef7.js";function a(){return o.jsx(s,{title:"Reset Password",description:"Password reset will be available soon."})}export{a as ResetPasswordPage};
