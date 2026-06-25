@@ -1,16 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, MapPin, Clock } from "lucide-react";
 import { useAppContext } from "@app/providers/AppProvider";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
 import { useAppNav } from "@hooks/useAppNav";
+import { useToast } from "@hooks/useToast";
 import { B } from "@styles/theme";
 import { fmt } from "@lib/utils";
 
 export function CheckoutScreen() {
   const nav = useAppNav();
+  const { success, warning } = useToast();
   const { cartItems } = useAppContext();
   const [method, setMethod] = useState<"pickup" | "delivery">("pickup");
+
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      warning("Your cart is empty");
+    }
+  }, [cartItems.length, warning]);
+
+  const handleProceedToPayment = () => {
+    if (cartItems.length === 0) {
+      warning("Your cart is empty");
+      return;
+    }
+    success("Order placed successfully");
+    nav("payment");
+  };
 
   const subtotal = cartItems.reduce((s, item) => s + item.product.price * item.quantity, 0);
   const total = subtotal + (method === "delivery" ? 15000 : 5000);
@@ -153,7 +170,7 @@ export function CheckoutScreen() {
         </div>
       </div>
       <div className="bg-white border-t border-slate-50 px-5 py-4 flex-shrink-0">
-        <PrimaryBtn className="w-full py-4" onClick={() => nav("payment")}>
+        <PrimaryBtn className="w-full py-4" onClick={handleProceedToPayment}>
           Choose Payment Method
         </PrimaryBtn>
       </div>

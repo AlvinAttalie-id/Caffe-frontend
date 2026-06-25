@@ -14,13 +14,13 @@ import {
   Check,
   Home,
 } from "lucide-react";
-import { useAppContext } from "@app/providers/AppProvider";
 import { useAppNav } from "@hooks/useAppNav";
+import { useToast } from "@hooks/useToast";
 import { B } from "@styles/theme";
 
 export function ProfileScreen() {
   const nav = useAppNav();
-  const { cartCount } = useAppContext();
+  const { success } = useToast();
   const menuItems: { Icon: typeof Home; label: string; sub: string; action?: () => void }[] = [
     { Icon: MapPin, label: "Saved Addresses", sub: "3 addresses saved" },
     { Icon: CreditCard, label: "Payment Methods", sub: "GoPay · Visa ···4821" },
@@ -79,7 +79,11 @@ export function ProfileScreen() {
                 </span>
               </div>
             </div>
-            <button className="px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-500">
+            <button
+              type="button"
+              onClick={() => success("Profile updated successfully")}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-500"
+            >
               Edit
             </button>
           </motion.div>

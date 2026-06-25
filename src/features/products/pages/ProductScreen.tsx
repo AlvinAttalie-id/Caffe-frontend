@@ -6,11 +6,13 @@ import { useAppContext } from "@app/providers/AppProvider";
 import { ProductSkeleton } from "@features/products/components/ProductSkeleton";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
 import { useAppNav } from "@hooks/useAppNav";
+import { useToast } from "@hooks/useToast";
 import { B } from "@styles/theme";
 import { fmt } from "@lib/utils";
 
 export function ProductScreen() {
   const nav = useAppNav();
+  const toast = useToast();
   const { selectedProduct, favorites, toggleFavorite, addToCart } = useAppContext();
   const [size, setSize] = useState("M");
   const [sugar, setSugar] = useState("Normal");
@@ -30,9 +32,13 @@ export function ProductScreen() {
 
   const product = selectedProduct;
   const isFavorite = favorites.includes(product.id);
-  const onFavorite = () => toggleFavorite(product.id);
+  const onFavorite = () => {
+    toggleFavorite(product.id);
+    toast.success(isFavorite ? "Removed from favorites" : "Added to favorites");
+  };
   const onAddToCart = (item: CartItem) => {
     addToCart(item);
+    toast.success("Added to cart successfully");
     nav("cart", "up");
   };
 

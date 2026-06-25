@@ -6,14 +6,23 @@ import { ProductCard } from "@features/products/components/ProductCard";
 import { SkProductCard } from "@features/products/components/SkProductCard";
 import { PRODUCTS } from "@data/mockData";
 import { useAppNav } from "@hooks/useAppNav";
+import { useToast } from "@hooks/useToast";
 import { B } from "@styles/theme";
 
 export function MenuScreen() {
   const nav = useAppNav();
-  const { cartCount, favorites, toggleFavorite, quickAdd, openProduct } = useAppContext();
+  const toast = useToast();
+  const { favorites, toggleFavorite, quickAdd, openProduct } = useAppContext();
 
-  const onFavorite = toggleFavorite;
-  const onAdd = quickAdd;
+  const onFavorite = (id: number) => {
+    const wasFavorite = favorites.includes(id);
+    toggleFavorite(id);
+    toast.success(wasFavorite ? "Removed from favorites" : "Added to favorites");
+  };
+  const onAdd = (p: (typeof PRODUCTS)[number]) => {
+    quickAdd(p);
+    toast.success("Added to cart successfully");
+  };
   const onProduct = (p: (typeof PRODUCTS)[number]) => {
     openProduct(p);
     nav("product");

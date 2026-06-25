@@ -1,1 +1,0 @@
-import{j as r}from"./index-9XNiahr_.js";import{C as e}from"./ComingSoon-BNgjd1cC.js";function t(){return r.jsx(e,{title:"Order Details",description:"Order details will be available soon."})}export{t as OrderDetailPage};

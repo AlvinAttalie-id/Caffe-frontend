@@ -4,15 +4,26 @@ import { ShoppingCart, X, Minus, Plus, Tag, MessageCircle, Award } from "lucide-
 import { useAppContext } from "@app/providers/AppProvider";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
 import { useAppNav } from "@hooks/useAppNav";
+import { useToast } from "@hooks/useToast";
 import { B } from "@styles/theme";
 import { fmt } from "@lib/utils";
 
 export function CartScreen() {
   const nav = useAppNav();
+  const toast = useToast();
   const { cartItems, updateCartQty, removeFromCart } = useAppContext();
 
   const onUpdateQty = updateCartQty;
-  const onRemove = removeFromCart;
+  const handleRemove = (idx: number) => {
+    const willBeEmpty = cartItems.length === 1;
+    removeFromCart(idx);
+    if (willBeEmpty) {
+      toast.success("Cart cleared successfully");
+    } else {
+      toast.success("Item removed from cart");
+    }
+  };
+  const onRemove = handleRemove;
   const [voucher, setVoucher] = useState("");
   const [applied, setApplied] = useState(false);
   const [notes, setNotes] = useState("");

@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, CreditCard } from "lucide-react";
 import { useAppNav } from "@hooks/useAppNav";
+import { useToast } from "@hooks/useToast";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
 import { B } from "@styles/theme";
 
 export function PaymentScreen() {
   const nav = useAppNav();
+  const toast = useToast();
   const [selected, setSelected] = useState("gopay");
   const [loading, setLoading] = useState(false);
 
@@ -14,6 +16,7 @@ export function PaymentScreen() {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
+      toast.success("Payment completed successfully");
       nav("tracking", "fade");
     }, 1500);
   };

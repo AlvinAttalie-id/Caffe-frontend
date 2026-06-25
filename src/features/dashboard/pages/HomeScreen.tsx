@@ -6,15 +6,24 @@ import { HomeSkeleton } from "@features/dashboard/components/HomeSkeleton";
 import { ProductCard } from "@features/products/components/ProductCard";
 import { PRODUCTS, STORES, BANNERS } from "@data/mockData";
 import { useAppNav } from "@hooks/useAppNav";
+import { useToast } from "@hooks/useToast";
 import { B } from "@styles/theme";
 import { fmt } from "@lib/utils";
 
 export function HomeScreen() {
   const nav = useAppNav();
+  const toast = useToast();
   const { favorites, toggleFavorite, quickAdd, openProduct } = useAppContext();
 
-  const onFavorite = toggleFavorite;
-  const onAdd = quickAdd;
+  const onFavorite = (id: number) => {
+    const wasFavorite = favorites.includes(id);
+    toggleFavorite(id);
+    toast.success(wasFavorite ? "Removed from favorites" : "Added to favorites");
+  };
+  const onAdd = (p: (typeof PRODUCTS)[number]) => {
+    quickAdd(p);
+    toast.success("Added to cart successfully");
+  };
   const onProduct = (p: (typeof PRODUCTS)[number]) => {
     openProduct(p);
     nav("product");

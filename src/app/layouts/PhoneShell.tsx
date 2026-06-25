@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { BottomNav, isTabRoute } from "@components/common/BottomNav";
+import { ToastContainer } from "@components/ui/ToastContainer";
 import { Dir } from "@types/navigation";
 import { EASE, VARIANTS } from "@lib/utils/animation";
 import { B } from "@styles/theme";
@@ -49,6 +50,8 @@ export function PhoneShell({ showBottomNav = false }: PhoneShellProps) {
             className="absolute top-3 left-1/2 -translate-x-1/2 w-28 h-8 rounded-full z-50"
             style={{ background: "#0F172A" }}
           />
+
+          <ToastContainer />
 
           <AnimatePresence>
             {showProgress && (
