@@ -1,0 +1,137 @@
+import React, { useState, useEffect } from "react";
+import { motion } from "motion/react";
+import { ChevronLeft, Search, Coffee } from "lucide-react";
+import { NavFn } from "@types/navigation";
+import { Product } from "@features/products/types";
+import { ProductCard } from "@features/products/components/ProductCard";
+import { SkProductCard } from "@features/products/components/SkProductCard";
+import { BottomNav } from "@components/common/BottomNav";
+import { PRODUCTS } from "@data/mockData";
+import { B } from "@styles/theme";
+
+interface MenuScreenProps {
+  nav: NavFn;
+  cartCount: number;
+  favorites: number[];
+  onFavorite: (id: number) => void;
+  onAdd: (p: Product) => void;
+  onProduct: (p: Product) => void;
+}
+
+export function MenuScreen({
+  nav,
+  cartCount,
+  favorites,
+  onFavorite,
+  onAdd,
+  onProduct,
+}: MenuScreenProps) {
+  const [cat, setCat] = useState("all");
+  const [search, setSearch] = useState("");
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoaded(true), 370);
+    return () => clearTimeout(t);
+  }, []);
+
+  const tabs = [
+    { id: "all", label: "All" },
+    { id: "coffee", label: "Coffee" },
+    { id: "noncoffee", label: "Non Coffee" },
+    { id: "tea", label: "Tea" },
+    { id: "pastry", label: "Pastry" },
+    { id: "snacks", label: "Snacks" },
+  ];
+
+  const filtered = PRODUCTS.filter(
+    p =>
+      (cat === "all" || p.category === cat) &&
+      p.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="w-full h-full flex flex-col" style={{ background: B.bg }}>
+      <div className="bg-white px-5 pt-12 pb-3 flex-shrink-0">
+        <div className="flex items-center gap-3 mb-4">
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            onClick={() => nav("home", "back")}
+            className="p-2 -ml-2 rounded-xl"
+          >
+            <ChevronLeft className="w-6 h-6" style={{ color: B.primary }} />
+          </motion.button>
+          <h1 className="font-extrabold text-lg flex-1 text-left" style={{ color: B.primary }}>
+            Our Menu
+          </h1>
+        </div>
+        <div className="flex items-center gap-3 bg-slate-50 rounded-2xl px-4 py-3 mb-4">
+          <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search drinks or food..."
+            className="flex-1 text-sm text-slate-700 outline-none bg-transparent placeholder-slate-300"
+          />
+        </div>
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+          {tabs.map(t => (
+            <motion.button
+              key={t.id}
+              onClick={() => setCat(t.id)}
+              whileTap={{ scale: 0.92 }}
+              className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold"
+              animate={{
+                background: cat === t.id ? B.primary : "transparent",
+                color: cat === t.id ? "#FFFFFF" : "#94A3B8",
+              }}
+              style={{ border: `1.5px solid ${cat === t.id ? B.primary : "#E2E8F0"}` }}
+            >
+              {t.label}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+      <div className="flex-1 overflow-y-auto no-scrollbar px-5 pt-4 pb-20">
+        {!loaded ? (
+          <div className="grid grid-cols-2 gap-3">
+            {[0, 1, 2, 3, 4, 5].map(i => (
+              <SkProductCard key={i} />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-48 gap-3">
+            <Coffee className="w-10 h-10 text-slate-200" />
+            <p className="text-sm text-slate-400">No items found</p>
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25 }}
+            className="grid grid-cols-2 gap-3"
+          >
+            {filtered.map((p, i) => (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04 }}
+              >
+                <ProductCard
+                  product={p}
+                  isFavorite={favorites.includes(p.id)}
+                  onPress={() => onProduct(p)}
+                  onFavorite={() => onFavorite(p.id)}
+                  onAdd={() => onAdd(p)}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </div>
+      <BottomNav active="menu" nav={nav} cartCount={cartCount} />
+    </div>
+  );
+}
