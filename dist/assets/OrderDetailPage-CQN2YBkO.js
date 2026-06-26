@@ -1,0 +1,1 @@
+import{j as r}from"./index-CPlFmAVA.js";import{C as e}from"./ComingSoon-CUZAls5M.js";function t(){return r.jsx(e,{title:"Order Details",description:"Order details will be available soon."})}export{t as OrderDetailPage};

@@ -1,1 +1,0 @@
-import{j as e}from"./index-C2nQLILQ.js";import{C as t}from"./ComingSoon-Dn3MJDbH.js";function n(){return e.jsx(t,{title:"Create Menu Item",description:"Menu creation tools are on the way."})}export{n as CreateMenuPage};

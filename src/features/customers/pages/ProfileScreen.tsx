@@ -1,148 +1,215 @@
 import React from "react";
 import { motion } from "motion/react";
+import type { LucideIcon } from "lucide-react";
 import {
-  MapPin,
-  CreditCard,
+  User,
+  Lock,
   Bell,
-  Trophy,
+  Globe,
   Clock,
+  CreditCard,
+  MapPin,
   HelpCircle,
   Shield,
-  Settings,
+  Info,
+  Palette,
   LogOut,
   ChevronRight,
-  Check,
-  Home,
 } from "lucide-react";
 import { useAppNav } from "@hooks/useAppNav";
 import { useToast } from "@hooks/useToast";
 import { B } from "@styles/theme";
 
+const PAGE_BG = "#F8F9FB";
+const CARD_BORDER = "#ECECEC";
+const MUTED = "#94A3B8";
+const ICON_GRAY = "#6B7280";
+
+type SettingRow = {
+  Icon: LucideIcon;
+  label: string;
+  subtitle?: string;
+  value?: string;
+  showChevron?: boolean;
+  action?: () => void;
+};
+
+type SettingSection = {
+  title: string;
+  items: SettingRow[];
+};
+
+function SettingRowButton({ item }: { item: SettingRow }) {
+  const showChevron = item.showChevron !== false;
+
+  return (
+    <motion.button
+      type="button"
+      onClick={item.action}
+      whileTap={item.action ? { scale: 0.99 } : undefined}
+      className="w-full h-14 flex items-center gap-3 px-[18px] bg-white text-left"
+    >
+      <item.Icon className="w-5 h-5 flex-shrink-0" style={{ color: ICON_GRAY }} strokeWidth={1.75} />
+      <div className="flex-1 min-w-0">
+        <p className="text-base font-medium truncate" style={{ color: B.primary }}>
+          {item.label}
+        </p>
+        {item.subtitle && (
+          <p className="text-sm font-normal truncate" style={{ color: MUTED }}>
+            {item.subtitle}
+          </p>
+        )}
+      </div>
+      {item.value && (
+        <span className="text-[15px] flex-shrink-0" style={{ color: MUTED }}>
+          {item.value}
+        </span>
+      )}
+      {showChevron && (
+        <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#CBD5E1" }} />
+      )}
+    </motion.button>
+  );
+}
+
+function SettingSectionBlock({ section }: { section: SettingSection }) {
+  return (
+    <div>
+      <p
+        className="text-xs font-semibold uppercase tracking-wide mb-3 px-1"
+        style={{ color: MUTED }}
+      >
+        {section.title}
+      </p>
+      <div className="bg-white rounded-2xl overflow-hidden">
+        {section.items.map((item, index) => (
+          <React.Fragment key={item.label}>
+            {index > 0 && (
+              <div className="h-px w-full" style={{ backgroundColor: CARD_BORDER }} />
+            )}
+            <SettingRowButton item={item} />
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function ProfileScreen() {
   const nav = useAppNav();
   const { success } = useToast();
-  const menuItems: { Icon: typeof Home; label: string; sub: string; action?: () => void }[] = [
-    { Icon: MapPin, label: "Saved Addresses", sub: "3 addresses saved" },
-    { Icon: CreditCard, label: "Payment Methods", sub: "GoPay · Visa ···4821" },
-    { Icon: Bell, label: "Notifications", sub: "All notifications on", action: () => nav("notifications") },
-    { Icon: Trophy, label: "Loyalty Points", sub: "2,450 pts · Gold Member", action: () => nav("loyalty") },
-    { Icon: Clock, label: "Order History", sub: "View past orders", action: () => nav("history") },
-    { Icon: HelpCircle, label: "Help Center", sub: "FAQ & live chat" },
-    { Icon: Shield, label: "Privacy & Security", sub: "Manage your data" },
-    { Icon: Settings, label: "App Settings", sub: "Theme, language, notifications" },
+
+  const sections: SettingSection[] = [
+    {
+      title: "Account",
+      items: [
+        {
+          Icon: User,
+          label: "Manage Profile",
+          action: () => success("Profile updated successfully"),
+        },
+        { Icon: Lock, label: "Password & Security" },
+        {
+          Icon: Bell,
+          label: "Notifications",
+          action: () => nav("notifications"),
+        },
+        { Icon: Globe, label: "Language", value: "English" },
+      ],
+    },
+    {
+      title: "Orders",
+      items: [
+        {
+          Icon: Clock,
+          label: "Order History",
+          action: () => nav("history"),
+        },
+        { Icon: CreditCard, label: "Payment Methods" },
+        { Icon: MapPin, label: "Saved Addresses" },
+      ],
+    },
+    {
+      title: "Support",
+      items: [
+        { Icon: HelpCircle, label: "Help Center" },
+        { Icon: Shield, label: "Privacy & Security" },
+        { Icon: Info, label: "About" },
+      ],
+    },
+    {
+      title: "Application",
+      items: [
+        { Icon: Palette, label: "Theme" },
+        {
+          Icon: Info,
+          label: "App Version",
+          value: "1.0.0",
+          showChevron: false,
+        },
+      ],
+    },
   ];
 
   return (
-    <div className="w-full h-full flex flex-col" style={{ background: B.bg }}>
-      <div className="bg-white px-5 pt-12 pb-4 flex-shrink-0">
-        <h1 className="font-extrabold text-lg text-left" style={{ color: B.primary }}>
+    <div className="w-full h-full flex flex-col" style={{ background: PAGE_BG }}>
+      <div className="px-5 pt-12 pb-2 flex-shrink-0">
+        <h1 className="text-[28px] font-bold text-left" style={{ color: B.primary }}>
           Profile
         </h1>
       </div>
+
       <div className="flex-1 overflow-y-auto no-scrollbar pb-20">
-        <div className="px-5 pt-4">
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white rounded-3xl p-5 shadow-sm border border-slate-50 flex items-center gap-4 text-left"
-          >
-            <div className="relative">
-              <div className="w-16 h-16 rounded-2xl overflow-hidden border-2" style={{ borderColor: B.accent }}>
-                <img
-                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=128&h=128&fit=crop&auto=format"
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div
-                className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center"
-                style={{ background: B.success }}
-              >
-                <Check className="w-2.5 h-2.5 text-white" />
-              </div>
-            </div>
-            <div className="flex-1">
-              <h2 className="font-extrabold text-base" style={{ color: B.primary }}>
-                Arjun Pratama
-              </h2>
-              <p className="text-sm text-slate-400">+62 812 3456 7890</p>
-              <div className="flex items-center gap-1.5 mt-1">
-                <div
-                  className="w-4 h-4 rounded-full flex items-center justify-center"
-                  style={{ background: B.accent }}
-                >
-                  <Trophy className="w-2.5 h-2.5 text-white" />
-                </div>
-                <span className="text-xs font-extrabold" style={{ color: B.secondary }}>
-                  Gold Member
-                </span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => success("Profile updated successfully")}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-500"
-            >
-              Edit
-            </button>
-          </motion.div>
-        </div>
-
-        <div className="px-5 pt-3">
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => nav("loyalty")}
-            className="w-full rounded-2xl p-3.5 flex items-center gap-3 shadow-sm text-left"
-            style={{ background: `linear-gradient(135deg, ${B.secondary} 0%, #A0714F 100%)` }}
-          >
-            <Trophy className="w-5 h-5 flex-shrink-0" style={{ color: B.accent }} />
-            <div className="flex-1">
-              <p className="text-white font-bold text-sm">2,450 Points</p>
-              <p className="text-white/55 text-xs">Gold Member · Tap to view rewards</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-white/50" />
-          </motion.button>
-        </div>
-
-        <div className="px-5 pt-4">
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-50 overflow-hidden">
-            {menuItems.map((item, i) => (
-              <motion.button
-                key={i}
-                onClick={item.action}
-                whileTap={{ scale: 0.99 }}
-                className={`w-full flex items-center gap-3 px-4 py-3.5 text-left ${
-                  i > 0 ? "border-t border-slate-50" : ""
-                }`}
-              >
-                <div
-                  className="w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: "#FFF8F0" }}
-                >
-                  <item.Icon className="w-4 h-4" style={{ color: B.secondary }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold" style={{ color: B.primary }}>
-                    {item.label}
-                  </p>
-                  <p className="text-xs text-slate-400 truncate">{item.sub}</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
-              </motion.button>
-            ))}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="px-5 pt-4 pb-2 flex items-center gap-3"
+        >
+          <div className="w-[60px] h-[60px] rounded-full overflow-hidden flex-shrink-0">
+            <img
+              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=128&h=128&fit=crop&auto=format"
+              alt="Avatar"
+              className="w-full h-full object-cover"
+            />
           </div>
-        </div>
-
-        <div className="px-5 pt-3 pb-4">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg font-semibold truncate" style={{ color: B.primary }}>
+              Arjun Pratama
+            </h2>
+            <p className="text-sm truncate" style={{ color: MUTED }}>
+              +62 812 3456 7890
+            </p>
+          </div>
           <motion.button
+            type="button"
+            whileTap={{ scale: 0.97 }}
+            onClick={() => success("Profile updated successfully")}
+            className="flex items-center gap-0.5 px-3 py-1.5 rounded-lg text-sm font-semibold border flex-shrink-0"
+            style={{ borderColor: CARD_BORDER, color: B.primary }}
+          >
+            Edit
+            <ChevronRight className="w-3.5 h-3.5" style={{ color: MUTED }} />
+          </motion.button>
+        </motion.div>
+
+        <div className="px-5 pt-6 flex flex-col gap-6">
+          {sections.map((section) => (
+            <SettingSectionBlock key={section.title} section={section} />
+          ))}
+
+          <motion.button
+            type="button"
             whileTap={{ scale: 0.97 }}
             onClick={() => nav("splash", "fade")}
-            className="w-full py-3.5 rounded-2xl flex items-center justify-center gap-2 border border-red-100"
-            style={{ background: "#FFF1F2" }}
+            className="w-full h-14 flex items-center justify-center gap-2 rounded-[14px] border"
+            style={{
+              borderColor: "#FECACA",
+              background: "#FFF1F2",
+            }}
           >
-            <LogOut className="w-4 h-4 text-red-400" />
-            <span className="text-sm font-bold text-red-400">Sign Out</span>
+            <LogOut className="w-4 h-4 text-red-400" strokeWidth={1.75} />
+            <span className="text-base font-semibold text-red-400">Sign Out</span>
           </motion.button>
         </div>
       </div>

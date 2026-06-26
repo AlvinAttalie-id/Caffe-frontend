@@ -119,20 +119,14 @@ export function OTPScreen() {
                 justify-content: center;
                 align-items: center;
                 width: 100%;
-                overflow: hidden;
                 gap: 8px;
                 margin-bottom: 32px;
               }
-              @media (min-width: 768px) {
-                .otp-container {
-                  gap: 12px;
-                }
-              }
               .otp-input {
-                width: 48px;
-                height: 56px;
-                border-radius: 12px;
-                font-size: 24px;
+                width: 40px;
+                height: 48px;
+                border-radius: 10px;
+                font-size: 20px;
                 font-weight: 600;
                 text-align: center;
                 flex: 0 0 auto;
@@ -140,9 +134,10 @@ export function OTPScreen() {
                 border: 2px solid #E2E8F0;
                 transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
               }
-              @media (max-width: 374px) {
+              @media (min-width: 768px) {
                 .otp-input {
-                  width: 42px !important;
+                  width: 44px;
+                  height: 52px;
                 }
               }
             `}</style>
@@ -163,9 +158,9 @@ export function OTPScreen() {
                   onFocus={() => setFocusedIndex(i)}
                   onBlur={() => setFocusedIndex(null)}
                   animate={{
-                    borderColor: i === focusedIndex ? B.primary : (digit ? B.accent : "#E2E8F0"),
-                    background: digit ? "#FFF8F0" : "white",
-                    boxShadow: i === focusedIndex ? "0 0 0 3px rgba(30, 41, 59, 0.15)" : "none",
+                    borderColor: i === focusedIndex ? B.primary : (digit ? B.primary : "#E2E8F0"),
+                    background: digit ? "#F8FAFC" : "white",
+                    boxShadow: i === focusedIndex ? "0 0 0 3px rgba(30, 41, 59, 0.12)" : "none",
                   }}
                   className="otp-input"
                   style={{ color: B.primary }}

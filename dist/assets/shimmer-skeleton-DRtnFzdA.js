@@ -1,1 +1,0 @@
-import{j as e}from"./index-C2nQLILQ.js";function r({className:s="",style:t={}}){return e.jsx("div",{className:`relative overflow-hidden bg-slate-100 ${s}`,style:t,children:e.jsx("div",{className:"absolute inset-0 skeleton-shimmer"})})}export{r as S};

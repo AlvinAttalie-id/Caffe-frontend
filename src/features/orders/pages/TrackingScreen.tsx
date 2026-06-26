@@ -7,7 +7,8 @@ import {
   MessageSquare,
   Phone,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  Check
 } from "lucide-react";
 import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
@@ -17,12 +18,46 @@ export function TrackingScreen() {
   const nav = useAppNav();
 
   const steps = [
-    { label: "Order Received", time: "09:41", done: true, active: false, emoji: "📱" },
-    { label: "Payment Confirmed", time: "09:42", done: true, active: false, emoji: "✅" },
-    { label: "Preparing Your Order", time: "09:43", done: true, active: true, emoji: "☕" },
-    { label: "Ready for Pickup", time: "~09:55", done: false, active: false, emoji: "🏪" },
-    { label: "Completed", time: "—", done: false, active: false, emoji: "🎉" },
+    { label: "Order Received", time: "09:41", done: true, active: false },
+    { label: "Payment Confirmed", time: "09:42", done: true, active: false },
+    { label: "Preparing Your Order", time: "09:43", done: true, active: true },
+    { label: "Ready for Pickup", time: "~09:55", done: false, active: false },
+    { label: "Completed", time: "—", done: false, active: false },
   ];
+
+  const getLineColor = (index: number) => {
+    const currentStep = steps[index];
+    const nextStep = steps[index + 1];
+
+    if (!nextStep) return "transparent";
+
+    if (currentStep.done && !currentStep.active && nextStep.done && !nextStep.active) {
+      return B.success; // Completed: Green
+    }
+    if (currentStep.active || (currentStep.done && nextStep.active)) {
+      return B.primary; // Current: Primary brand color
+    }
+    return "#E2E8F0"; // Pending: Light gray
+  };
+
+  const getTextStyle = (step: typeof steps[number]) => {
+    if (step.active) {
+      return {
+        fontWeight: 700,
+        color: B.primary,
+      };
+    }
+    if (step.done) {
+      return {
+        fontWeight: 500,
+        color: B.primary,
+      };
+    }
+    return {
+      fontWeight: 500,
+      color: "#94A3B8", // Pending: Muted gray
+    };
+  };
 
   return (
     <div className="w-full h-full flex flex-col" style={{ background: B.bg }}>
@@ -132,39 +167,54 @@ export function TrackingScreen() {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", delay: 0.2 + i * 0.1 }}
-                    className="w-10 h-10 rounded-2xl flex items-center justify-center text-base z-10 flex-shrink-0"
+                    className="w-7 h-7 rounded-full flex items-center justify-center z-10 flex-shrink-0"
                     style={{
-                      background: step.active ? B.secondary : step.done ? "#F0FDF4" : "#F8FAFC",
-                      border: `2px solid ${step.active ? B.secondary : step.done ? B.success : "#E2E8F0"
-                        }`,
-                      boxShadow: step.active ? `0 0 12px ${B.secondary}40` : "none",
+                      background: step.active
+                        ? B.primary
+                        : step.done && !step.active
+                        ? "#FFFFFF"
+                        : "#FFFFFF",
+                      border: `2px solid ${
+                        step.active
+                          ? B.primary
+                          : step.done && !step.active
+                          ? B.success
+                          : "#CBD5E1"
+                      }`,
+                      boxShadow: step.active ? `0 0 8px ${B.primary}40` : "none",
                     }}
                   >
-                    {step.done && !step.active ? (
-                      <span className="text-xs font-bold" style={{ color: B.success }}>✓</span>
-                    ) : (
-                      <span className={step.active ? "animate-bounce" : ""}>{step.emoji}</span>
-                    )}
+                    {step.active ? (
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    ) : step.done ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-500 stroke-[3]" />
+                    ) : null}
                   </motion.div>
                   {i < steps.length - 1 && (
                     <div
-                      className="absolute top-10 w-0.5 bottom-[-24px]"
+                      className="absolute top-7 w-[2px] bottom-[-24px] left-1/2 -translate-x-1/2"
                       style={{
-                        background: step.done && steps[i + 1].done ? B.success : "#E2E8F0",
-                        opacity: step.done && steps[i + 1].done ? 1 : 0.6,
+                        background: getLineColor(i),
                       }}
                     />
                   )}
                 </div>
-                <div className="flex-1 pt-1.5">
+                <div className="flex-1 pt-0.5">
                   <div className="flex items-center justify-between">
                     <p
-                      className="text-sm font-extrabold"
-                      style={{ color: step.done || step.active ? B.primary : "#94A3B8" }}
+                      className="text-sm transition-colors duration-200"
+                      style={getTextStyle(step)}
                     >
                       {step.label}
                     </p>
-                    <span className="text-[11px] font-semibold text-slate-400">{step.time}</span>
+                    <span
+                      className="text-[11px] font-bold text-right"
+                      style={{
+                        color: step.done || step.active ? B.secondary : `${B.secondary}80`
+                      }}
+                    >
+                      {step.time}
+                    </span>
                   </div>
                   {step.active && (
                     <p className="text-xs text-slate-400 mt-1">
