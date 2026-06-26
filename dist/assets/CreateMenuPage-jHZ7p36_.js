@@ -1,1 +1,0 @@
-import{j as e}from"./index-BsAoWj-o.js";import{C as t}from"./ComingSoon-DR4NueRf.js";function n(){return e.jsx(t,{title:"Create Menu Item",description:"Menu creation tools are on the way."})}export{n as CreateMenuPage};

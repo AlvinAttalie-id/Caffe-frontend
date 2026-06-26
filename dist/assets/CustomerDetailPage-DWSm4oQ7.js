@@ -1,1 +1,0 @@
-import{j as o}from"./index-BsAoWj-o.js";import{C as t}from"./ComingSoon-DR4NueRf.js";function r(){return o.jsx(t,{title:"Customer Details",description:"Customer details will be available soon."})}export{r as CustomerDetailPage};

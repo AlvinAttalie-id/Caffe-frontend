@@ -1,1 +1,0 @@
-import{j as r}from"./index-BsAoWj-o.js";import{C as e}from"./ComingSoon-DR4NueRf.js";function i(){return r.jsx(e,{title:"Orders",description:"Order management will be available soon."})}export{i as OrdersPage};

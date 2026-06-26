@@ -1,1 +1,0 @@
-import{j as i}from"./index-BsAoWj-o.js";import{C as t}from"./ComingSoon-DR4NueRf.js";function n(){return i.jsx(t,{title:"Edit Menu Item",description:"Menu editing will be available soon."})}export{n as EditMenuPage};

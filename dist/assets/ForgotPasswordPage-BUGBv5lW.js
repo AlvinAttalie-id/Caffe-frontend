@@ -1,0 +1,1 @@
+import{j as o}from"./index-C2nQLILQ.js";import{C as r}from"./ComingSoon-Dn3MJDbH.js";function e(){return o.jsx(r,{title:"Forgot Password",description:"Password recovery will be available soon."})}export{e as ForgotPasswordPage};
