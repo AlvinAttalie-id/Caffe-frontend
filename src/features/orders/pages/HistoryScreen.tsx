@@ -6,6 +6,12 @@ import { OrderHistorySkeleton } from "@features/orders/components/OrderHistorySk
 import { B } from "@styles/theme";
 import { fmt } from "@lib/utils";
 
+const itemCount = (items: string[]) =>
+  items.reduce((sum, item) => {
+    const match = item.match(/×(\d+)$/);
+    return sum + (match ? parseInt(match[1], 10) : 1);
+  }, 0);
+
 export function HistoryScreen() {
   const nav = useAppNav();
   const [loaded, setLoaded] = useState(false);
@@ -18,6 +24,7 @@ export function HistoryScreen() {
   const orders = [
     {
       id: "#BRW-20240622-0047",
+      store: "Brew & Co. Sudirman",
       date: "22 Jun 2024 · 09:41",
       items: ["Caramel Macchiato L", "Butter Croissant ×2"],
       total: 95000,
@@ -27,6 +34,7 @@ export function HistoryScreen() {
     },
     {
       id: "#BRW-20240620-0039",
+      store: "Brew & Co. SCBD",
       date: "20 Jun 2024 · 14:22",
       items: ["Classic Cappuccino M", "Cold Brew M"],
       total: 78000,
@@ -36,6 +44,7 @@ export function HistoryScreen() {
     },
     {
       id: "#BRW-20240618-0033",
+      store: "Brew & Co. Kemang",
       date: "18 Jun 2024 · 11:05",
       items: ["Americano S", "Matcha Oat Latte M"],
       total: 74000,
@@ -45,6 +54,7 @@ export function HistoryScreen() {
     },
     {
       id: "#BRW-20240615-0029",
+      store: "Brew & Co. Sudirman",
       date: "15 Jun 2024 · 16:30",
       items: ["Caramel Macchiato XL", "Dark Chocolate L"],
       total: 102000,
@@ -70,44 +80,46 @@ export function HistoryScreen() {
           </h1>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto no-scrollbar px-5 pt-4 pb-6">
+      <div className="flex-1 overflow-y-auto no-scrollbar px-5 pt-2 pb-6">
         {!loaded ? (
           <OrderHistorySkeleton />
         ) : (
-          <div className="space-y-3">
+          <div>
             {orders.map((order, i) => (
               <motion.div
                 key={order.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 }}
-                className="bg-white rounded-3xl p-4 shadow-sm border border-slate-50 text-left"
+                className="py-3 border-b border-slate-50 text-left"
               >
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-100 flex-shrink-0">
-                    <img src={order.image} alt={order.id} className="w-full h-full object-cover" />
-                  </div>
+                <span
+                  className="inline-block text-[10px] font-extrabold px-2 py-1 rounded-full mb-1.5"
+                  style={{ color: order.statusColor, background: order.statusColor + "18" }}
+                >
+                  {order.status}
+                </span>
+
+                <p className="font-extrabold text-sm mb-1" style={{ color: B.primary }}>
+                  {order.store}
+                </p>
+
+                <p className="text-xs text-slate-400 mb-1.5">{order.date}</p>
+
+                <div className="flex items-start justify-between gap-3 mb-2">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="font-extrabold text-sm" style={{ color: B.primary }}>
-                        {order.id}
-                      </p>
-                      <span
-                        className="text-[10px] font-extrabold px-2 py-1 rounded-full"
-                        style={{ color: order.statusColor, background: order.statusColor + "18" }}
-                      >
-                        {order.status}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400 mb-1.5">{order.date}</p>
                     {order.items.map((item, j) => (
-                      <p key={j} className="text-xs text-slate-500">• {item}</p>
+                      <p key={j} className="text-xs text-slate-500">
+                        • {item}
+                      </p>
                     ))}
                   </div>
+                  <p className="text-xs text-slate-400 flex-shrink-0">Ordered via App</p>
                 </div>
-                <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+
+                <div className="flex items-center justify-between pt-2 border-t border-slate-50">
                   <span className="font-extrabold text-sm" style={{ color: B.primary }}>
-                    {fmt(order.total)}
+                    {itemCount(order.items)} item • {fmt(order.total)}
                   </span>
                   <div className="flex gap-2">
                     {order.status === "Preparing" && (
