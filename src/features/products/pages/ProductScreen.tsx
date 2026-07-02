@@ -14,48 +14,105 @@ export function ProductScreen() {
   const nav = useAppNav();
   const toast = useToast();
   const { selectedProduct, favorites, toggleFavorite, addToCart } = useAppContext();
-  const [size, setSize] = useState("M");
-  const [sugar, setSugar] = useState("Normal");
-  const [ice, setIce] = useState("Normal");
+  const product = selectedProduct;
+  
+  // Set defaults dynamically based on API options
+  const apiSizes = useMemo(() => {
+    if (!product || !product.sizes || product.sizes.length === 0) {
+      return [
+        { id: "Regular", extra: 0 },
+        { id: "Large", extra: 5000 },
+      ];
+    }
+    return product.sizes.map((s: any) => ({
+      id: s.name,
+      extra: Number(s.price_adjustment),
+      dbId: s.id
+    }));
+  }, [product]);
+
+  const apiSugars = useMemo(() => {
+    if (!product || !product.sugar_levels || product.sugar_levels.length === 0) {
+      return ["0%", "25%", "50%", "Normal Sugar", "Extra Sugar"];
+    }
+    return product.sugar_levels.map((s: any) => s.name);
+  }, [product]);
+
+  const apiIces = useMemo(() => {
+    if (!product || !product.ice_levels || product.ice_levels.length === 0) {
+      return ["No Ice", "Less Ice", "Normal Ice"];
+    }
+    return product.ice_levels.map((i: any) => i.name);
+  }, [product]);
+
+  const apiToppings = useMemo(() => {
+    if (!product || !product.toppings || product.toppings.length === 0) {
+      return [
+        { id: "cream", label: "Whipped Cream", price: 5000 },
+        { id: "choc", label: "Chocolate Drizzle", price: 3000 },
+      ];
+    }
+    return product.toppings.map((t: any) => ({
+      id: t.name,
+      label: t.name,
+      price: Number(t.price),
+      dbId: t.id
+    }));
+  }, [product]);
+
+  const [size, setSize] = useState("");
+  const [sugar, setSugar] = useState("");
+  const [ice, setIce] = useState("");
   const [toppings, setToppings] = useState<string[]>([]);
   const [qty, setQty] = useState(1);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setLoaded(true), 320);
-    return () => clearTimeout(t);
-  }, []);
+    if (product) {
+      setSize(apiSizes[0]?.id || "");
+      setSugar(apiSugars.find((s: string) => s.toLowerCase().includes("normal")) || apiSugars[0] || "");
+      setIce(apiIces.find((i: string) => i.toLowerCase().includes("normal")) || apiIces[0] || "");
+      setToppings([]);
+      setQty(1);
+      setLoaded(true);
+    }
+  }, [product, apiSizes, apiSugars, apiIces]);
 
-  if (!selectedProduct) {
+  if (!product) {
     return null;
   }
 
-  const product = selectedProduct;
   const isFavorite = favorites.includes(product.id);
   const onFavorite = () => {
     toggleFavorite(product.id);
     toast.success(isFavorite ? "Removed from favorites" : "Added to favorites");
   };
-  const onAddToCart = (item: CartItem) => {
-    addToCart(item);
-    toast.success("Added to cart successfully");
-    nav("cart", "up");
+
+  const onAddToCart = async (item: CartItem) => {
+    try {
+      const matchedSize = product.sizes?.find((s: any) => s.name === size);
+      const matchedSugar = product.sugar_levels?.find((s: any) => s.name === sugar);
+      const matchedIce = product.ice_levels?.find((i: any) => i.name === ice);
+      const matchedToppingIds = product.toppings?.filter((t: any) => toppings.includes(t.name)).map((t: any) => t.id) || [];
+
+      await addToCart({
+        ...item,
+        product_size_id: matchedSize?.id || null,
+        product_sugar_level_id: matchedSugar?.id || null,
+        product_ice_level_id: matchedIce?.id || null,
+        topping_ids: matchedToppingIds,
+      });
+      toast.success("Added to cart successfully");
+      nav("cart", "up");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to add to cart");
+    }
   };
 
-  const sizes = [
-    { id: "S", extra: 0 },
-    { id: "M", extra: 5000 },
-    { id: "L", extra: 10000 },
-    { id: "XL", extra: 15000 },
-  ];
-  const sugars = ["0%", "25%", "50%", "Normal", "Extra"];
-  const ices = ["No Ice", "Less", "Normal", "Extra"];
-  const addons = [
-    { id: "cream", label: "Whipped Cream", price: 5000 },
-    { id: "choc", label: "Chocolate Drizzle", price: 3000 },
-    { id: "java", label: "Java Chips", price: 8000 },
-    { id: "pearl", label: "Tapioca Pearl", price: 7000 },
-  ];
+  const sizes = apiSizes;
+  const sugars = apiSugars;
+  const ices = apiIces;
+  const addons = apiToppings;
 
   const toggleAddon = (id: string) =>
     setToppings(prev =>

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useMemo } from "react";
 import { motion } from "motion/react";
 import {
   ChevronLeft,
@@ -10,20 +10,92 @@ import {
   CheckCircle2,
   Check
 } from "lucide-react";
+import { useLocation } from "react-router";
 import { useAppNav } from "@hooks/useAppNav";
+import { useOrderDetail, useTracking } from "@features/orders/hooks/useOrders";
 import { B } from "@styles/theme";
 import { fmt } from "@lib/utils";
 
+const TIMELINE_LABELS = [
+  "Order Received",
+  "Payment Confirmed",
+  "Preparing Your Order",
+  "Ready for Pickup",
+  "Completed",
+];
+
+const STATUS_ACTIVE_INDEX: Record<string, number> = {
+  pending: 0,
+  preparing: 2,
+  ready_for_pickup: 3,
+  completed: 4,
+  cancelled: -1,
+};
+
+const STATUS_PROGRESS: Record<string, string> = {
+  pending: "25%",
+  preparing: "60%",
+  ready_for_pickup: "85%",
+  completed: "100%",
+  cancelled: "0%",
+};
+
+function formatTime(iso?: string) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatStatusLabel(status?: string) {
+  if (!status) return "Processing";
+  return status.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function buildSteps(status: string, createdAt?: string, updatedAt?: string) {
+  const activeIndex = STATUS_ACTIVE_INDEX[status] ?? 0;
+  const baseTime = createdAt ? formatTime(createdAt) : "—";
+  const updatedTime = updatedAt ? formatTime(updatedAt) : "—";
+
+  return TIMELINE_LABELS.map((label, index) => {
+    const done = status === "completed" ? true : index < activeIndex;
+    const active = status !== "completed" && status !== "cancelled" && index === activeIndex;
+    const time =
+      index === 0
+        ? baseTime
+        : index === activeIndex && active
+          ? updatedTime
+          : done
+            ? updatedTime
+            : "—";
+
+    return { label, time, done, active };
+  });
+}
+
 export function TrackingScreen() {
   const nav = useAppNav();
+  const location = useLocation();
+  const orderNumber = (location.state as { orderNumber?: string } | null)?.orderNumber || "";
+  const { data: tracking } = useTracking(orderNumber);
+  const { data: order } = useOrderDetail(orderNumber);
 
-  const steps = [
-    { label: "Order Received", time: "09:41", done: true, active: false },
-    { label: "Payment Confirmed", time: "09:42", done: true, active: false },
-    { label: "Preparing Your Order", time: "09:43", done: true, active: true },
-    { label: "Ready for Pickup", time: "~09:55", done: false, active: false },
-    { label: "Completed", time: "—", done: false, active: false },
-  ];
+  const status = tracking?.status || order?.status || "preparing";
+  const steps = useMemo(
+    () => buildSteps(status, tracking?.created_at || order?.created_at, tracking?.updated_at),
+    [status, tracking?.created_at, tracking?.updated_at, order?.created_at]
+  );
+  const progressWidth = STATUS_PROGRESS[status] || "60%";
+  const statusLabel = formatStatusLabel(status);
+  const summaryItems = order?.items || [];
+  const subtotal = Number(order?.subtotal || 0);
+  const deliveryFee = Number(order?.delivery_fee || 0);
+  const discount = Number(order?.discount_amount || 0);
+  const total = Number(order?.total || 0);
+  const pickupStore = tracking?.store || order?.store?.name || "Caffe Brew";
+  const addressLine = order?.address?.address_line;
+  const addressName = order?.address?.receiver_name;
 
   const getLineColor = (index: number) => {
     const currentStep = steps[index];
@@ -94,7 +166,7 @@ export function TrackingScreen() {
               Your order has been placed successfully.
             </p>
             <p className="text-[10px] text-emerald-600 mt-0.5 font-medium">
-              Order ID: #BRW-20240622-0047
+              Order ID: {orderNumber || order?.order_number || "—"}
             </p>
           </div>
         </motion.div>
@@ -112,14 +184,14 @@ export function TrackingScreen() {
                 Estimated Arrival
               </p>
               <p className="text-3xl font-extrabold flex items-baseline gap-2" style={{ color: B.primary }}>
-                09:55
+                {formatTime(tracking?.updated_at || order?.created_at)}
                 <span className="text-xs font-bold" style={{ color: B.secondary }}>
-                  • 12 min left
+                  • {pickupStore}
                 </span>
               </p>
             </div>
             <span className="px-3.5 py-1.5 rounded-full text-xs font-extrabold text-amber-700 bg-amber-50 border border-amber-100 animate-pulse">
-              Preparing
+              {statusLabel}
             </span>
           </div>
 
@@ -127,7 +199,7 @@ export function TrackingScreen() {
             <div className="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden relative">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: "60%" }}
+                animate={{ width: progressWidth }}
                 transition={{ duration: 1.5, ease: "easeOut", delay: 0.3 }}
                 className="h-full rounded-full relative"
                 style={{ background: `linear-gradient(to right, ${B.secondary}, ${B.accent})` }}
@@ -238,13 +310,15 @@ export function TrackingScreen() {
             </div>
             <div className="flex-1">
               <h4 className="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider">
-                Delivery Address
+                {order?.order_type === "delivery" ? "Delivery Address" : "Pickup Store"}
               </h4>
               <p className="font-bold text-sm mt-0.5" style={{ color: B.primary }}>
-                Arjun Pratama
+                {order?.order_type === "delivery" ? addressName || "Recipient" : pickupStore}
               </p>
               <p className="text-xs text-slate-400 mt-0.5">
-                Jl. Menteng Raya No. 14, Jakarta Pusat
+                {order?.order_type === "delivery"
+                  ? addressLine || "Address not available"
+                  : "Your order will be ready for pickup at this store"}
               </p>
             </div>
           </div>
@@ -300,40 +374,61 @@ export function TrackingScreen() {
             Order Summary
           </h3>
           <div className="space-y-3">
-            {[
-              { name: "Caramel Macchiato", size: "L", qty: 1, price: 55000 },
-              { name: "Butter Croissant", size: "", qty: 2, price: 70000 },
-            ].map((item, i) => (
-              <div key={i} className="flex items-start justify-between">
-                <div className="text-sm">
-                  <span className="font-bold" style={{ color: B.primary }}>
-                    {item.qty}×
-                  </span>{" "}
-                  <span className="text-slate-600">{item.name}</span>
-                  {item.size && (
-                    <span className="text-[11px] text-slate-400 block mt-0.5">
-                      Size: {item.size}
-                    </span>
-                  )}
+            {summaryItems.length > 0 ? (
+              summaryItems.map((item: any, i: number) => (
+                <div key={item.id || i} className="flex items-start justify-between">
+                  <div className="text-sm">
+                    <span className="font-bold" style={{ color: B.primary }}>
+                      {item.quantity}×
+                    </span>{" "}
+                    <span className="text-slate-600">{item.product?.name || item.product_name}</span>
+                    {item.size && (
+                      <span className="text-[11px] text-slate-400 block mt-0.5">
+                        Size: {item.size}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-sm font-semibold" style={{ color: B.primary }}>
+                    {fmt(Number(item.price) * Number(item.quantity))}
+                  </span>
                 </div>
-                <span className="text-sm font-semibold" style={{ color: B.primary }}>
-                  {fmt(item.price)}
-                </span>
-              </div>
-            ))}
+              ))
+            ) : (
+              [
+                { name: "Caramel Macchiato", size: "L", qty: 1, price: 55000 },
+                { name: "Butter Croissant", size: "", qty: 2, price: 70000 },
+              ].map((item, i) => (
+                <div key={i} className="flex items-start justify-between">
+                  <div className="text-sm">
+                    <span className="font-bold" style={{ color: B.primary }}>
+                      {item.qty}×
+                    </span>{" "}
+                    <span className="text-slate-600">{item.name}</span>
+                    {item.size && (
+                      <span className="text-[11px] text-slate-400 block mt-0.5">
+                        Size: {item.size}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-sm font-semibold" style={{ color: B.primary }}>
+                    {fmt(item.price)}
+                  </span>
+                </div>
+              ))
+            )}
             <div className="h-px bg-slate-100 my-2" />
             <div className="space-y-2 text-xs text-slate-500 font-medium">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>{fmt(125000)}</span>
+                <span>{fmt(subtotal || 125000)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Delivery Fee</span>
-                <span>{fmt(15000)}</span>
+                <span>{fmt(deliveryFee || 15000)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Discount</span>
-                <span className="text-emerald-500">-{fmt(45000)}</span>
+                <span className="text-emerald-500">-{fmt(discount || 45000)}</span>
               </div>
             </div>
             <div className="h-px bg-slate-100 my-2" />
@@ -342,7 +437,7 @@ export function TrackingScreen() {
                 Total
               </span>
               <span className="font-extrabold text-base" style={{ color: B.primary }}>
-                {fmt(95000)}
+                {fmt(total || 95000)}
               </span>
             </div>
           </div>

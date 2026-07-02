@@ -1,26 +1,37 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { ChevronLeft, Search, Navigation, Coffee, Building2, MapPin, Clock, Star } from "lucide-react";
 import { SkStoreCard } from "@features/dashboard/components/SkStoreCard";
-import { STORES } from "@data/mockData";
+import {
+  formatStoreDistance,
+  isStoreOpen,
+  storePickupLabel,
+  useStores,
+} from "@features/dashboard/hooks/useStores";
+import { useAppContext } from "@app/providers/AppProvider";
 import { useAppNav } from "@hooks/useAppNav";
 import { B } from "@styles/theme";
 
 export function StoreScreen() {
   const nav = useAppNav();
+  const { selectedStore, setSelectedStore } = useAppContext();
   const [search, setSearch] = useState("");
-  const [loaded, setLoaded] = useState(false);
+  const { data: stores = [], isLoading } = useStores();
 
-  useEffect(() => {
-    const t = setTimeout(() => setLoaded(true), 360);
-    return () => clearTimeout(t);
-  }, []);
-
-  const filtered = STORES.filter(
-    s =>
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.address.toLowerCase().includes(search.toLowerCase())
+  const filtered = useMemo(
+    () =>
+      stores.filter(
+        store =>
+          store.name.toLowerCase().includes(search.toLowerCase()) ||
+          store.address.toLowerCase().includes(search.toLowerCase())
+      ),
+    [stores, search]
   );
+
+  const handleSelectStore = (store: (typeof stores)[number]) => {
+    setSelectedStore(store);
+    nav("home", "back");
+  };
 
   return (
     <div className="w-full h-full flex flex-col" style={{ background: B.bg }}>
@@ -64,75 +75,103 @@ export function StoreScreen() {
           <div className="bg-white rounded-2xl px-5 py-2.5 shadow-xl flex items-center gap-2">
             <Navigation className="w-4 h-4" style={{ color: B.secondary }} />
             <span className="text-sm font-bold" style={{ color: B.primary }}>
-              3 stores nearby
+              {stores.length} store{stores.length === 1 ? "" : "s"} nearby
             </span>
           </div>
         </div>
-        {[{ x: "28%", y: "38%" }, { x: "55%", y: "28%" }, { x: "72%", y: "58%" }].map((pos, i) => (
-          <motion.div
-            key={i}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.15 + i * 0.1, type: "spring" }}
-            className="absolute w-6 h-6 rounded-full border-2 border-white flex items-center justify-center shadow-md"
-            style={{ left: pos.x, top: pos.y, background: i === 0 ? B.secondary : B.primary }}
-          >
-            <Coffee className="w-3 h-3 text-white" />
-          </motion.div>
-        ))}
+        {filtered.slice(0, 3).map((store, i) => {
+          const positions = [
+            { x: "28%", y: "38%" },
+            { x: "55%", y: "28%" },
+            { x: "72%", y: "58%" },
+          ];
+          const pos = positions[i] || positions[0];
+          const isSelected = selectedStore?.id === store.id;
+
+          return (
+            <motion.div
+              key={store.id}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.15 + i * 0.1, type: "spring" }}
+              className="absolute w-6 h-6 rounded-full border-2 border-white flex items-center justify-center shadow-md"
+              style={{
+                left: pos.x,
+                top: pos.y,
+                background: isSelected ? B.secondary : B.primary,
+              }}
+            >
+              <Coffee className="w-3 h-3 text-white" />
+            </motion.div>
+          );
+        })}
       </div>
       <div className="flex-1 overflow-y-auto no-scrollbar px-5 pt-4 pb-6 space-y-3">
-        {!loaded
+        {isLoading
           ? [0, 1, 2].map(i => <SkStoreCard key={i} />)
-          : filtered.map((store, i) => (
-              <motion.button
-                key={store.id}
-                whileTap={{ scale: 0.98 }}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.07 }}
-                onClick={() => nav("home", "back")}
-                className="w-full bg-white rounded-3xl p-5 shadow-sm border border-slate-50 text-left"
-              >
-                <div className="flex items-start gap-4">
-                  <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: "#FFF3E8" }}
-                  >
-                    <Building2 className="w-7 h-7" style={{ color: B.secondary }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-extrabold text-sm" style={{ color: B.primary }}>
-                        {store.name}
-                      </h3>
-                      <span
-                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                          store.isOpen ? "text-green-600 bg-green-50" : "text-red-500 bg-red-50"
-                        }`}
-                      >
-                        {store.isOpen ? "Open" : "Closed"}
-                      </span>
+          : filtered.length === 0
+            ? (
+              <div className="pt-16 text-center">
+                <p className="text-sm text-slate-400">No stores found.</p>
+              </div>
+            )
+            : filtered.map((store, i) => {
+              const open = isStoreOpen(store);
+              const isSelected = selectedStore?.id === store.id;
+
+              return (
+                <motion.button
+                  key={store.id}
+                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.07 }}
+                  onClick={() => handleSelectStore(store)}
+                  className="w-full bg-white rounded-3xl p-5 shadow-sm border text-left"
+                  style={{
+                    borderColor: isSelected ? B.secondary + "55" : "#f8fafc",
+                  }}
+                >
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: "#FFF3E8" }}
+                    >
+                      <Building2 className="w-7 h-7" style={{ color: B.secondary }} />
                     </div>
-                    <p className="text-xs text-slate-400 mb-2">{store.address}</p>
-                    <div className="flex items-center gap-4">
-                      <span className="flex items-center gap-1 text-xs text-slate-500">
-                        <MapPin className="w-3 h-3" style={{ color: B.secondary }} />
-                        {store.distance}
-                      </span>
-                      <span className="flex items-center gap-1 text-xs text-slate-500">
-                        <Clock className="w-3 h-3" style={{ color: B.secondary }} />
-                        {store.isOpen ? store.time : store.hours}
-                      </span>
-                      <span className="flex items-center gap-1 text-xs text-slate-500">
-                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                        {store.rating}
-                      </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="font-extrabold text-sm" style={{ color: B.primary }}>
+                          {store.name}
+                        </h3>
+                        <span
+                          className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                            open ? "text-green-600 bg-green-50" : "text-red-500 bg-red-50"
+                          }`}
+                        >
+                          {open ? "Open" : "Closed"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 mb-2">{store.address}</p>
+                      <div className="flex items-center gap-4">
+                        <span className="flex items-center gap-1 text-xs text-slate-500">
+                          <MapPin className="w-3 h-3" style={{ color: B.secondary }} />
+                          {formatStoreDistance(store)}
+                        </span>
+                        <span className="flex items-center gap-1 text-xs text-slate-500">
+                          <Clock className="w-3 h-3" style={{ color: B.secondary }} />
+                          {storePickupLabel(store)}
+                        </span>
+                        <span className="flex items-center gap-1 text-xs text-slate-500">
+                          <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                          4.8
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.button>
-            ))}
+                </motion.button>
+              );
+            })}
       </div>
     </div>
   );

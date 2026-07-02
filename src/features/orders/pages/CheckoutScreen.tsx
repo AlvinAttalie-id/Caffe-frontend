@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, MapPin, Clock } from "lucide-react";
 import { useAppContext } from "@app/providers/AppProvider";
+import { useAuth } from "@features/auth/hooks/useAuth";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
 import { useAppNav } from "@hooks/useAppNav";
 import { useToast } from "@hooks/useToast";
@@ -11,8 +12,11 @@ import { fmt } from "@lib/utils";
 export function CheckoutScreen() {
   const nav = useAppNav();
   const { success, warning } = useToast();
-  const { cartItems } = useAppContext();
+  const { cartItems, summary, selectedStore } = useAppContext();
+  const { user } = useAuth();
   const [method, setMethod] = useState<"pickup" | "delivery">("pickup");
+
+  const defaultAddress = user?.addresses?.find((a: any) => a.is_default) || user?.addresses?.[0];
 
   useEffect(() => {
     if (cartItems.length === 0) {
@@ -25,12 +29,24 @@ export function CheckoutScreen() {
       warning("Your cart is empty");
       return;
     }
-    success("Order placed successfully");
-    nav("payment");
+    if (!selectedStore) {
+      warning("Please select a pickup store");
+      nav("store");
+      return;
+    }
+    if (method === "delivery" && !defaultAddress) {
+      warning("Please add a delivery address to your profile");
+      return;
+    }
+    nav("payment", "forward", {
+      orderType: method,
+      addressId: method === "delivery" ? defaultAddress?.id : null,
+    });
   };
 
-  const subtotal = cartItems.reduce((s, item) => s + item.product.price * item.quantity, 0);
-  const total = subtotal + (method === "delivery" ? 15000 : 5000);
+  const subtotal = summary.subtotal;
+  const deliveryFee = method === "delivery" ? 15000 : 0;
+  const total = summary.total + deliveryFee;
 
   return (
     <div className="w-full h-full flex flex-col" style={{ background: B.bg }}>
@@ -71,7 +87,12 @@ export function CheckoutScreen() {
             <h3 className="font-bold text-sm" style={{ color: B.primary }}>
               {method === "pickup" ? "Pickup Store" : "Delivery Address"}
             </h3>
-            <button className="ml-auto text-xs font-bold" style={{ color: B.secondary }}>
+            <button
+              type="button"
+              onClick={() => nav("store")}
+              className="ml-auto text-xs font-bold"
+              style={{ color: B.secondary }}
+            >
               Change
             </button>
           </div>
@@ -85,9 +106,11 @@ export function CheckoutScreen() {
                 transition={{ duration: 0.2 }}
               >
                 <p className="font-bold text-sm" style={{ color: B.primary }}>
-                  Brew &amp; Co. Sudirman
+                  {selectedStore?.name || "Select a store"}
                 </p>
-                <p className="text-xs text-slate-400">Jl. Jend. Sudirman No. 52, Jakarta</p>
+                <p className="text-xs text-slate-400">
+                  {selectedStore?.address || "Choose a store before checkout"}
+                </p>
                 <p className="text-xs mt-1 font-semibold" style={{ color: B.success }}>
                   Ready in ~10 minutes
                 </p>
@@ -101,9 +124,9 @@ export function CheckoutScreen() {
                 transition={{ duration: 0.2 }}
               >
                 <p className="font-bold text-sm" style={{ color: B.primary }}>
-                  Arjun Pratama
+                  {defaultAddress?.recipient_name || user?.name || "Guest"}
                 </p>
-                <p className="text-xs text-slate-400">Jl. Menteng Raya No. 14, Jakarta Pusat</p>
+                <p className="text-xs text-slate-400">{defaultAddress?.address_line || "No address set"}, {defaultAddress?.city || ""}</p>
                 <p className="text-xs mt-1 text-slate-400">Estimated 25–35 minutes</p>
               </motion.div>
             )}
@@ -150,7 +173,7 @@ export function CheckoutScreen() {
               <span className="text-slate-500">
                 {method === "pickup" ? "Service Fee" : "Delivery Fee"}
               </span>
-              <span>{fmt(method === "pickup" ? 5000 : 15000)}</span>
+              <span>{fmt(method === "pickup" ? summary.service_fee : deliveryFee)}</span>
             </div>
             <div className="h-px bg-slate-100" />
             <div className="flex justify-between font-extrabold">

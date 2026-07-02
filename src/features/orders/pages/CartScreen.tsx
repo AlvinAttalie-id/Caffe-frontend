@@ -11,7 +11,7 @@ import { fmt } from "@lib/utils";
 export function CartScreen() {
   const nav = useAppNav();
   const toast = useToast();
-  const { cartItems, updateCartQty, removeFromCart } = useAppContext();
+  const { cartItems, updateCartQty, removeFromCart, voucher, summary, applyVoucher, removeVoucher } = useAppContext();
 
   const onUpdateQty = updateCartQty;
   const handleRemove = (idx: number) => {
@@ -24,13 +24,13 @@ export function CartScreen() {
     }
   };
   const onRemove = handleRemove;
-  const [voucher, setVoucher] = useState("");
-  const [applied, setApplied] = useState(false);
+  const [voucherInput, setVoucherInput] = useState("");
   const [notes, setNotes] = useState("");
 
-  const subtotal = cartItems.reduce((s, item) => s + item.product.price * item.quantity, 0);
-  const discount = applied ? 10000 : 0;
-  const total = subtotal - discount + 5000;
+  const subtotal = summary.subtotal;
+  const discount = summary.discount;
+  const total = summary.total;
+  const serviceFee = summary.service_fee;
 
   if (cartItems.length === 0) {
     return (
@@ -152,31 +152,47 @@ export function CartScreen() {
           <div className="flex gap-2">
             <input
               type="text"
-              value={voucher}
-              onChange={e => setVoucher(e.target.value.toUpperCase())}
+              value={voucher ? voucher.code : voucherInput}
+              disabled={!!voucher}
+              onChange={e => setVoucherInput(e.target.value.toUpperCase())}
               placeholder="Enter voucher code"
               className="flex-1 px-4 py-2.5 bg-slate-50 rounded-xl text-sm text-slate-700 outline-none placeholder-slate-300"
             />
             <motion.button
               whileTap={{ scale: 0.93 }}
-              onClick={() => {
-                if (voucher) setApplied(true);
+              onClick={async () => {
+                if (voucher) {
+                  try {
+                    await removeVoucher();
+                    setVoucherInput("");
+                    toast.success("Voucher removed");
+                  } catch (err: any) {
+                    toast.error(err.response?.data?.message || "Failed to remove voucher");
+                  }
+                } else if (voucherInput) {
+                  try {
+                    await applyVoucher(voucherInput);
+                    toast.success("Voucher applied successfully");
+                  } catch (err: any) {
+                    toast.error(err.response?.data?.message || "Invalid voucher code");
+                  }
+                }
               }}
               className="px-4 py-2.5 rounded-xl text-sm font-bold text-white flex-shrink-0"
-              style={{ background: applied ? B.success : B.secondary }}
+              style={{ background: voucher ? B.success : B.secondary }}
             >
-              {applied ? "✓" : "Apply"}
+              {voucher ? "Remove" : "Apply"}
             </motion.button>
           </div>
           <AnimatePresence>
-            {applied && (
+            {voucher && (
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-xs mt-2"
                 style={{ color: B.success }}
               >
-                ✓ BREW10 applied — Rp 10,000 off!
+                ✓ {voucher.code} applied — {voucher.discount_type === 'percentage' ? `${voucher.discount_value}%` : fmt(voucher.discount_value)} off!
               </motion.p>
             )}
           </AnimatePresence>
@@ -217,10 +233,10 @@ export function CartScreen() {
                 </span>
               </motion.div>
             )}
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-500">Service Fee</span>
+             <div className="flex justify-between text-sm">
+              <span className="text-slate-500">Service &amp; Tax Fee</span>
               <span className="font-semibold" style={{ color: B.primary }}>
-                {fmt(5000)}
+                {fmt(serviceFee)}
               </span>
             </div>
             <div className="h-px bg-slate-100" />

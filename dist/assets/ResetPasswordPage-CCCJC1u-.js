@@ -1,0 +1,1 @@
+import{j as o}from"./index-RqYW6GJx.js";import{C as s}from"./ComingSoon-e1zaDtM9.js";function t(){return o.jsx(s,{title:"Reset Password",description:"Password reset will be available soon."})}export{t as ResetPasswordPage};

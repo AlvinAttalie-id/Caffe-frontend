@@ -1,24 +1,71 @@
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, CreditCard } from "lucide-react";
+import { useLocation } from "react-router";
+import { useAppContext } from "@app/providers/AppProvider";
+import { useCheckoutMutation } from "@features/orders/hooks/useOrders";
 import { useAppNav } from "@hooks/useAppNav";
 import { useToast } from "@hooks/useToast";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
 import { B } from "@styles/theme";
+import { fmt } from "@lib/utils";
 
 export function PaymentScreen() {
   const nav = useAppNav();
+  const location = useLocation();
   const toast = useToast();
+  const { summary, selectedStore } = useAppContext();
+  const checkoutMutation = useCheckoutMutation();
   const [selected, setSelected] = useState("gopay");
   const [loading, setLoading] = useState(false);
 
-  const handlePay = () => {
+  const checkoutState = location.state as {
+    orderType?: "pickup" | "delivery";
+    addressId?: number | null;
+  } | null;
+  const orderType = checkoutState?.orderType || "pickup";
+  const addressId = checkoutState?.addressId ?? null;
+
+  // Map payment UI selection to backend enum
+  const paymentMethodMap: Record<string, string> = {
+    qris: "midtrans",
+    gopay: "midtrans",
+    ovo: "midtrans",
+    dana: "midtrans",
+    shopeepay: "midtrans",
+    card: "midtrans",
+    cash: "cash",
+  };
+
+  const handlePay = async () => {
+    if (!selectedStore) {
+      toast.error("Please select a store before checkout");
+      nav("store");
+      return;
+    }
+
+    if (orderType === "delivery" && !addressId) {
+      toast.error("Delivery address is required");
+      nav("checkout", "back");
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const result = await checkoutMutation.mutateAsync({
+        store_id: selectedStore.id,
+        order_type: orderType,
+        address_id: orderType === "delivery" ? addressId : null,
+        payment_method: paymentMethodMap[selected] || "cash",
+        notes: "",
+      });
       toast.success("Payment completed successfully");
-      nav("tracking", "fade");
-    }, 1500);
+      nav("tracking", "fade", { orderNumber: result.data?.order_number });
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Payment failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const wallets = [
@@ -72,7 +119,7 @@ export function PaymentScreen() {
           <div className="text-left">
             <p className="text-xs text-slate-400 mb-0.5">Total Payment</p>
             <p className="text-2xl font-extrabold" style={{ color: B.primary }}>
-              Rp 95,000
+              {fmt(summary.total)}
             </p>
           </div>
           <div className="text-3xl">💰</div>
@@ -132,7 +179,7 @@ export function PaymentScreen() {
       </div>
       <div className="bg-white border-t border-slate-50 px-5 py-4 flex-shrink-0">
         <PrimaryBtn className="w-full py-4" loading={loading} onClick={handlePay}>
-          Pay Now — Rp 95,000
+          Pay Now — {fmt(summary.total)}
         </PrimaryBtn>
       </div>
     </div>

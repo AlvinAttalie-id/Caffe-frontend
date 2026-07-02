@@ -1,0 +1,1 @@
+import{j as i}from"./index-RqYW6GJx.js";import{C as t}from"./ComingSoon-e1zaDtM9.js";function n(){return i.jsx(t,{title:"Edit Menu Item",description:"Menu editing will be available soon."})}export{n as EditMenuPage};

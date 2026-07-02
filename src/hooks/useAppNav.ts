@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useNavigate } from "react-router";
 import { ROUTES } from "@app/router/routes";
 import { useAppContext } from "@app/providers/AppProvider";
-import { Dir, NavFn, Screen } from "@types/navigation";
+import { Dir, NavFn, NavState, Screen } from "@types/navigation";
 
 function screenToPath(screen: Screen, productId?: number): string {
   switch (screen) {
@@ -52,10 +52,10 @@ export function useAppNav(): NavFn {
   const { selectedProduct, productNavIdRef } = useAppContext();
 
   return useCallback<NavFn>(
-    (to, dir = "forward") => {
+    (to, dir = "forward", state?: NavState) => {
       const productId = productNavIdRef.current ?? selectedProduct?.id;
       const path = screenToPath(to, productId ?? undefined);
-      navigate(path, { state: { direction: dir } });
+      navigate(path, { state: { direction: dir, ...state } });
     },
     [navigate, productNavIdRef, selectedProduct?.id]
   );

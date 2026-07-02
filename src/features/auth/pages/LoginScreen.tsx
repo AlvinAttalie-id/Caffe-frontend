@@ -5,18 +5,30 @@ import { PrimaryBtn } from "@components/ui/PrimaryBtn";
 import { SocialLoginButton } from "@components/ui/SocialLoginButton";
 import { B } from "@styles/theme";
 import { useAppNav } from "@hooks/useAppNav";
+import { useAuth } from "@features/auth/hooks/useAuth";
+import { useToast } from "@hooks/useToast";
 
 export function LoginScreen() {
   const nav = useAppNav();
+  const toast = useToast();
+  const { login } = useAuth();
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSend = () => {
+  const handleSend = async () => {
+    if (!phone.trim()) {
+      toast.error("Phone number is required");
+      return;
+    }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await login(phone);
       nav("otp");
-    }, 1200);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -1,0 +1,1 @@
+import{j as o}from"./index-RqYW6GJx.js";import{C as t}from"./ComingSoon-e1zaDtM9.js";function s(){return o.jsx(t,{title:"Customers",description:"Customer management will be available soon."})}export{s as CustomersPage};

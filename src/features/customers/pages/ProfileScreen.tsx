@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useAppNav } from "@hooks/useAppNav";
 import { useToast } from "@hooks/useToast";
+import { useAuth } from "@features/auth/hooks/useAuth";
 import { B } from "@styles/theme";
 
 const PAGE_BG = "#F8F9FB";
@@ -98,6 +99,7 @@ function SettingSectionBlock({ section }: { section: SettingSection }) {
 export function ProfileScreen() {
   const nav = useAppNav();
   const { success } = useToast();
+  const { user, logout } = useAuth();
 
   const sections: SettingSection[] = [
     {
@@ -175,10 +177,10 @@ export function ProfileScreen() {
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-lg font-semibold truncate" style={{ color: B.primary }}>
-              Arjun Pratama
+              {user?.name || "Guest"}
             </h2>
             <p className="text-sm truncate" style={{ color: MUTED }}>
-              +62 812 3456 7890
+              {user?.phone || user?.email || ""}
             </p>
           </div>
           <motion.button
@@ -201,7 +203,10 @@ export function ProfileScreen() {
           <motion.button
             type="button"
             whileTap={{ scale: 0.97 }}
-            onClick={() => nav("splash", "fade")}
+            onClick={() => {
+              logout();
+              nav("splash", "fade");
+            }}
             className="w-full h-14 flex items-center justify-center gap-2 rounded-[14px] border"
             style={{
               borderColor: "#FECACA",

@@ -4,9 +4,13 @@ import { ChevronLeft, Phone, CheckCircle } from "lucide-react";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
 import { B } from "@styles/theme";
 import { useAppNav } from "@hooks/useAppNav";
+import { useAuth } from "@features/auth/hooks/useAuth";
+import { useToast } from "@hooks/useToast";
 
 export function OTPScreen() {
   const nav = useAppNav();
+  const toast = useToast();
+  const { verifyOtp, tempPhone } = useAuth();
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timeLeft, setTimeLeft] = useState(30);
   const [loading, setLoading] = useState(false);
@@ -33,13 +37,22 @@ export function OTPScreen() {
     if (e.key === "Backspace" && !otp[i] && i > 0) refs.current[i - 1]?.focus();
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
+    const code = otp.join("");
+    if (code.length < 6) {
+      toast.error("Please enter the 6-digit OTP code");
+      return;
+    }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await verifyOtp(code);
       setVerified(true);
       setTimeout(() => nav("home", "fade"), 1400);
-    }, 1000);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Invalid credentials or verification code");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -110,7 +123,7 @@ export function OTPScreen() {
             <p className="text-slate-400 text-sm mb-8 text-left">
               We sent a 6-digit code to
               <br />
-              <span className="font-bold text-slate-600">+62 812 3456 7890</span>
+              <span className="font-bold text-slate-600">{tempPhone || "+62 812 3456 7890"}</span>
             </p>
             
             <style>{`

@@ -1,57 +1,72 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
 import { Bell, MapPin, ChevronDown, Search, Trophy, Clock, Building2 } from "lucide-react";
 import { useAppContext } from "@app/providers/AppProvider";
 import { HomeSkeleton } from "@features/dashboard/components/HomeSkeleton";
 import { ProductCard } from "@features/products/components/ProductCard";
-import { PRODUCTS, STORES, BANNERS } from "@data/mockData";
+import { STORES, BANNERS } from "@data/mockData";
+import { useHome } from "@features/dashboard/hooks/useHome";
+import { formatStoreDistance, isStoreOpen, useStores } from "@features/dashboard/hooks/useStores";
 import { useAppNav } from "@hooks/useAppNav";
 import { useToast } from "@hooks/useToast";
+import { useAuth } from "@features/auth/hooks/useAuth";
+import { useProducts, useCategories } from "@features/products/hooks/useProducts";
 import { B } from "@styles/theme";
 import { fmt } from "@lib/utils";
 
 export function HomeScreen() {
   const nav = useAppNav();
   const toast = useToast();
-  const { favorites, toggleFavorite, quickAdd, openProduct } = useAppContext();
+  const { favorites, toggleFavorite, quickAdd, openProduct, selectedStore } = useAppContext();
+  const { user } = useAuth();
+  const [cat, setCat] = useState("all");
+  const { data: apiProducts = [], isLoading: productsLoading } = useProducts({ category_slug: cat === "all" ? undefined : cat });
+  const { data: apiCategories = [] } = useCategories();
+  const { data: homeData } = useHome();
+  const { data: apiStores = [] } = useStores();
+
+  const banners = useMemo(() => {
+    const apiBanners = homeData?.banners || [];
+    if (apiBanners.length === 0) return BANNERS;
+    return apiBanners.map(banner => ({
+      id: banner.id,
+      title: banner.title,
+      subtitle: banner.link_url || "",
+      image: banner.image_url,
+      badge: "Promo",
+      color: B.secondary,
+    }));
+  }, [homeData?.banners]);
 
   const onFavorite = (id: number) => {
     const wasFavorite = favorites.includes(id);
     toggleFavorite(id);
     toast.success(wasFavorite ? "Removed from favorites" : "Added to favorites");
   };
-  const onAdd = (p: (typeof PRODUCTS)[number]) => {
+  const onAdd = (p: any) => {
     quickAdd(p);
     toast.success("Added to cart successfully");
   };
-  const onProduct = (p: (typeof PRODUCTS)[number]) => {
+  const onProduct = (p: any) => {
     openProduct(p);
     nav("product");
   };
-  const [loaded, setLoaded] = useState(false);
   const [bannerIdx, setBannerIdx] = useState(0);
-  const [cat, setCat] = useState("all");
+
+  const loaded = !productsLoading;
 
   useEffect(() => {
-    const t = setTimeout(() => setLoaded(true), 430);
-    return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    const t = setInterval(() => setBannerIdx(i => (i + 1) % BANNERS.length), 4200);
+    if (banners.length === 0) return;
+    const t = setInterval(() => setBannerIdx(i => (i + 1) % banners.length), 4200);
     return () => clearInterval(t);
-  }, []);
+  }, [banners.length]);
 
   const categories = [
     { id: "all", label: "All" },
-    { id: "coffee", label: "Coffee" },
-    { id: "noncoffee", label: "Non Coffee" },
-    { id: "tea", label: "Tea" },
-    { id: "pastry", label: "Pastry" },
-    { id: "snacks", label: "Snacks" },
+    ...apiCategories.map(c => ({ id: c.slug, label: c.name })),
   ];
 
-  const filtered = cat === "all" ? PRODUCTS : PRODUCTS.filter(p => p.category === cat);
+  const filtered = apiProducts;
 
   if (!loaded) return <HomeSkeleton />;
 
@@ -69,7 +84,7 @@ export function HomeScreen() {
           <div>
             <p className="text-slate-400 text-xs mb-0.5">Good morning ☀️</p>
             <h1 className="font-extrabold text-lg" style={{ color: B.primary }}>
-              Arjun Pratama
+              {user?.name || "Guest"}
             </h1>
           </div>
           <div className="flex items-center gap-2">
@@ -96,7 +111,9 @@ export function HomeScreen() {
           className="flex items-center gap-1.5 mb-3 bg-slate-50 rounded-full px-3 py-1.5"
         >
           <MapPin className="w-3.5 h-3.5" style={{ color: B.secondary }} />
-          <span className="text-xs text-slate-600 font-semibold">Brew &amp; Co. Sudirman</span>
+          <span className="text-xs text-slate-600 font-semibold">
+            {selectedStore?.name || "Select a store"}
+          </span>
           <ChevronDown className="w-3 h-3 text-slate-400" />
         </motion.button>
         <motion.button
@@ -113,7 +130,7 @@ export function HomeScreen() {
         {/* Banners carousel */}
         <div className="px-5 pt-4">
           <div className="relative h-44 rounded-3xl overflow-hidden shadow-md">
-            {BANNERS.map((banner, i) => (
+            {banners.map((banner, i) => (
               <div
                 key={banner.id}
                 className="absolute inset-0 transition-opacity duration-700"
@@ -138,7 +155,7 @@ export function HomeScreen() {
               </div>
             ))}
             <div className="absolute bottom-3 right-4 flex gap-1.5">
-              {BANNERS.map((_, i) => (
+              {banners.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setBannerIdx(i)}
@@ -273,7 +290,7 @@ export function HomeScreen() {
             </button>
           </div>
           <div className="bg-white rounded-3xl p-4 shadow-sm border border-slate-50">
-            {[PRODUCTS[0], PRODUCTS[2]].map((p, i) => (
+            {apiProducts.slice(0, 2).map((p, i) => (
               <div
                 key={p.id}
                 className={`flex items-center gap-3 ${i > 0 ? "pt-3 mt-3 border-t border-slate-50" : ""}`}
@@ -311,44 +328,85 @@ export function HomeScreen() {
             </button>
           </div>
           <div className="space-y-3">
-            {STORES.slice(0, 2).map(store => (
-              <motion.button
-                key={store.id}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => nav("store")}
-                className="w-full bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-slate-50 text-left"
-              >
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: "#FFF3E8" }}
-                >
-                  <Building2 className="w-6 h-6" style={{ color: B.secondary }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm" style={{ color: B.primary }}>
-                    {store.name}
-                  </p>
-                  <p className="text-xs text-slate-400 truncate">{store.address}</p>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="flex items-center gap-1 text-[11px] text-slate-400">
-                      <MapPin className="w-3 h-3" />
-                      {store.distance}
+          <div className="space-y-3">
+            {apiStores.length > 0
+              ? apiStores.slice(0, 2).map(store => (
+                  <motion.button
+                    key={store.id}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => nav("store")}
+                    className="w-full bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-slate-50 text-left"
+                  >
+                    <div
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: "#FFF3E8" }}
+                    >
+                      <Building2 className="w-6 h-6" style={{ color: B.secondary }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm" style={{ color: B.primary }}>
+                        {store.name}
+                      </p>
+                      <p className="text-xs text-slate-400 truncate">{store.address}</p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                          <MapPin className="w-3 h-3" />
+                          {formatStoreDistance(store)}
+                        </span>
+                        <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                          <Clock className="w-3 h-3" />
+                          {isStoreOpen(store) ? "5 min pickup" : "Closed"}
+                        </span>
+                      </div>
+                    </div>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-1 rounded-full flex-shrink-0 ${
+                        isStoreOpen(store) ? "text-green-600 bg-green-50" : "text-red-500 bg-red-50"
+                      }`}
+                    >
+                      {isStoreOpen(store) ? "Open" : "Closed"}
                     </span>
-                    <span className="flex items-center gap-1 text-[11px] text-slate-400">
-                      <Clock className="w-3 h-3" />
-                      {store.time}
+                  </motion.button>
+                ))
+              : STORES.slice(0, 2).map(store => (
+                  <motion.button
+                    key={store.id}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => nav("store")}
+                    className="w-full bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-slate-50 text-left"
+                  >
+                    <div
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: "#FFF3E8" }}
+                    >
+                      <Building2 className="w-6 h-6" style={{ color: B.secondary }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm" style={{ color: B.primary }}>
+                        {store.name}
+                      </p>
+                      <p className="text-xs text-slate-400 truncate">{store.address}</p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                          <MapPin className="w-3 h-3" />
+                          {store.distance}
+                        </span>
+                        <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                          <Clock className="w-3 h-3" />
+                          {store.time}
+                        </span>
+                      </div>
+                    </div>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-1 rounded-full flex-shrink-0 ${
+                        store.isOpen ? "text-green-600 bg-green-50" : "text-red-500 bg-red-50"
+                      }`}
+                    >
+                      {store.isOpen ? "Open" : "Closed"}
                     </span>
-                  </div>
-                </div>
-                <span
-                  className={`text-[10px] font-bold px-2 py-1 rounded-full flex-shrink-0 ${
-                    store.isOpen ? "text-green-600 bg-green-50" : "text-red-500 bg-red-50"
-                  }`}
-                >
-                  {store.isOpen ? "Open" : "Closed"}
-                </span>
-              </motion.button>
-            ))}
+                  </motion.button>
+                ))}
+          </div>
           </div>
         </div>
       </div>

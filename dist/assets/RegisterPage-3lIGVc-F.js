@@ -1,0 +1,1 @@
+import{j as o}from"./index-RqYW6GJx.js";import{C as t}from"./ComingSoon-e1zaDtM9.js";function r(){return o.jsx(t,{title:"Create Account",description:"Registration will be available soon."})}export{r as RegisterPage};

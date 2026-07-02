@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion } from "motion/react";
 import { ChevronLeft, Search, Coffee } from "lucide-react";
 import { useAppContext } from "@app/providers/AppProvider";
 import { ProductCard } from "@features/products/components/ProductCard";
 import { SkProductCard } from "@features/products/components/SkProductCard";
-import { PRODUCTS } from "@data/mockData";
+import { useProducts, useCategories } from "@features/products/hooks/useProducts";
 import { useAppNav } from "@hooks/useAppNav";
 import { useToast } from "@hooks/useToast";
 import { B } from "@styles/theme";
@@ -19,37 +19,26 @@ export function MenuScreen() {
     toggleFavorite(id);
     toast.success(wasFavorite ? "Removed from favorites" : "Added to favorites");
   };
-  const onAdd = (p: (typeof PRODUCTS)[number]) => {
+  const onAdd = (p: any) => {
     quickAdd(p);
     toast.success("Added to cart successfully");
   };
-  const onProduct = (p: (typeof PRODUCTS)[number]) => {
+  const onProduct = (p: any) => {
     openProduct(p);
     nav("product");
   };
   const [cat, setCat] = useState("all");
   const [search, setSearch] = useState("");
-  const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    const t = setTimeout(() => setLoaded(true), 370);
-    return () => clearTimeout(t);
-  }, []);
+  const { data: apiProducts = [], isLoading } = useProducts({ search: search || undefined, category_slug: cat === "all" ? undefined : cat });
+  const { data: apiCategories = [] } = useCategories();
 
   const tabs = [
     { id: "all", label: "All" },
-    { id: "coffee", label: "Coffee" },
-    { id: "noncoffee", label: "Non Coffee" },
-    { id: "tea", label: "Tea" },
-    { id: "pastry", label: "Pastry" },
-    { id: "snacks", label: "Snacks" },
+    ...apiCategories.map(c => ({ id: c.slug, label: c.name })),
   ];
 
-  const filtered = PRODUCTS.filter(
-    p =>
-      (cat === "all" || p.category === cat) &&
-      p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = apiProducts;
 
   return (
     <div className="w-full h-full flex flex-col" style={{ background: B.bg }}>
@@ -98,7 +87,7 @@ export function MenuScreen() {
         </div>
       </div>
       <div className="flex-1 overflow-y-auto no-scrollbar px-5 pt-4 pb-4">
-        {!loaded ? (
+        {isLoading ? (
           <div className="grid grid-cols-2 gap-3">
             {[0, 1, 2, 3, 4, 5].map(i => (
               <SkProductCard key={i} />
