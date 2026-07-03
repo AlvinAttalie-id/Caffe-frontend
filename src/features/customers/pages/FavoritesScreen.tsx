@@ -4,30 +4,30 @@ import { Heart } from "lucide-react";
 import { useAppContext } from "@app/providers/AppProvider";
 import { ProductCard } from "@features/products/components/ProductCard";
 import { PrimaryBtn } from "@components/ui/PrimaryBtn";
-import { PRODUCTS } from "@data/mockData";
 import { useAppNav } from "@hooks/useAppNav";
 import { useToast } from "@hooks/useToast";
 import { B } from "@styles/theme";
+import { Product } from "@features/products/types";
 
 export function FavoritesScreen() {
   const nav = useAppNav();
   const toast = useToast();
-  const { favorites, toggleFavorite, quickAdd, openProduct } = useAppContext();
+  const { favorites, favoriteItems, toggleFavorite, quickAdd, openProduct } = useAppContext();
 
   const onFavorite = (id: number) => {
     const wasFavorite = favorites.includes(id);
     toggleFavorite(id);
     toast.success(wasFavorite ? "Removed from favorites" : "Added to favorites");
   };
-  const onAdd = (p: (typeof PRODUCTS)[number]) => {
+  const onAdd = (p: Product & Record<string, any>) => {
     quickAdd(p);
     toast.success("Added to cart successfully");
   };
-  const onProduct = (p: (typeof PRODUCTS)[number]) => {
+  const onProduct = (p: Product & Record<string, any>) => {
     openProduct(p);
     nav("product");
   };
-  const favProducts = PRODUCTS.filter(p => favorites.includes(p.id));
+  const favProducts = favoriteItems;
 
   return (
     <div className="w-full h-full flex flex-col" style={{ background: B.bg }}>

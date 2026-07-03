@@ -6,12 +6,14 @@ import { useAuth } from "@features/auth/hooks/useAuth";
 import { Store, useStores } from "@features/dashboard/hooks/useStores";
 import { Product } from "@features/products/types";
 import { CartItem } from "@features/orders/types";
+import { normalizeProduct } from "@features/products/hooks/useProducts";
 
 const SELECTED_STORE_KEY = "caffe_brew_selected_store";
 
 interface AppContextValue {
   cartItems: CartItem[];
   favorites: number[];
+  favoriteItems: (Product & Record<string, any>)[];
   selectedProduct: Product | null;
   selectedStore: Store | null;
   cartCount: number;
@@ -131,6 +133,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const favorites = useMemo<number[]>(() => {
     if (!apiFavorites) return [];
     return apiFavorites.map((p: any) => p.id);
+  }, [apiFavorites]);
+
+  // Map API Favorites to full Product objects for the Favorites screen
+  const favoriteItems = useMemo<(Product & Record<string, any>)[]>(() => {
+    if (!apiFavorites) return [];
+    return apiFavorites.map(normalizeProduct);
   }, [apiFavorites]);
 
   const setSelectedProduct = useCallback((product: Product | null) => {
@@ -271,6 +279,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     () => ({
       cartItems,
       favorites,
+      favoriteItems,
       selectedProduct,
       selectedStore,
       cartCount,
@@ -291,6 +300,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [
       cartItems,
       favorites,
+      favoriteItems,
       selectedProduct,
       selectedStore,
       cartCount,
