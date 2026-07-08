@@ -54,6 +54,7 @@ export function PhoneShell({ showBottomNav = false }: PhoneShellProps) {
             <motion.main
               key={location.pathname}
               className="absolute inset-0 overflow-y-auto overflow-x-hidden"
+              style={bottomNavVisible ? { paddingBottom: "calc(72px + env(safe-area-inset-bottom, 0px))" } : undefined}
               variants={VARIANTS[direction]}
               initial="initial"
               animate="animate"
@@ -65,7 +66,16 @@ export function PhoneShell({ showBottomNav = false }: PhoneShellProps) {
           </AnimatePresence>
         </div>
 
-        {bottomNavVisible && <BottomNav />}
+        {bottomNavVisible && (
+          <div
+            className="fixed bottom-0 left-0 right-0 z-50 bg-white"
+            style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+          >
+            <div className="w-full" style={{ maxWidth: 430, margin: "0 auto" }}>
+              <BottomNav />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

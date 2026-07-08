@@ -1,1 +1,0 @@
-import{j as o}from"./index-CCMZkMxT.js";import{C as r}from"./ComingSoon-D4GitJlk.js";function e(){return o.jsx(r,{title:"Forgot Password",description:"Password recovery will be available soon."})}export{e as ForgotPasswordPage};

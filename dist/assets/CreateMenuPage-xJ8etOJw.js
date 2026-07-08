@@ -1,1 +1,0 @@
-import{j as e}from"./index-CCMZkMxT.js";import{C as t}from"./ComingSoon-D4GitJlk.js";function n(){return e.jsx(t,{title:"Create Menu Item",description:"Menu creation tools are on the way."})}export{n as CreateMenuPage};

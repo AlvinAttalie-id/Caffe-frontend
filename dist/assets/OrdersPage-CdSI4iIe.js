@@ -1,1 +1,0 @@
-import{j as r}from"./index-CPlFmAVA.js";import{C as e}from"./ComingSoon-CUZAls5M.js";function i(){return r.jsx(e,{title:"Orders",description:"Order management will be available soon."})}export{i as OrdersPage};
