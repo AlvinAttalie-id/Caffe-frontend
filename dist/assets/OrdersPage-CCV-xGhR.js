@@ -1,0 +1,1 @@
+import{j as r}from"./index-CCMZkMxT.js";import{C as e}from"./ComingSoon-D4GitJlk.js";function i(){return r.jsx(e,{title:"Orders",description:"Order management will be available soon."})}export{i as OrdersPage};

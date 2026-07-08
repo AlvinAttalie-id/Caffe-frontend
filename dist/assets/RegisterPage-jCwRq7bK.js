@@ -1,0 +1,1 @@
+import{j as o}from"./index-CCMZkMxT.js";import{C as t}from"./ComingSoon-D4GitJlk.js";function r(){return o.jsx(t,{title:"Create Account",description:"Registration will be available soon."})}export{r as RegisterPage};
